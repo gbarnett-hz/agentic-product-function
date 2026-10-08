@@ -25,21 +25,43 @@ See `agentic-team.png` for the original diagram (out of date: lanes are dev+test
 
 ## Install
 
-Two skills ship in this repo: `agentic-product-function` (the team) and `create-prd` (how you write PRDs). Install both into your project with the [skills CLI](https://github.com/vercel-labs/skills):
+Two skills ship in this repo: `agentic-product-function` (the team) and `create-prd` (how you write PRDs). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
 
+**Prerequisites:** Node.js (for `npx`), a git repository with a GitHub remote, `gh` authenticated, `python3`, and Anthropic's `anthropic-skills` plugin (the CLI cannot install it; it provides `deep-research`).
+
+### 1. Preview what the repo offers (optional)
 ```bash
-cd your-project            # a git repo with a GitHub remote
-npx skills add <owner>/<repo> --skill agentic-product-function --skill create-prd -a claude-code
+npx skills add gbarnett-hz/agentic-product-function --list
+```
+You should see two skills: `agentic-product-function` and `create-prd`.
+
+### 2. Install into your project
+```bash
+cd your-project
+npx skills add gbarnett-hz/agentic-product-function \
+  --skill agentic-product-function --skill create-prd -a claude-code
+```
+- Installs to `./.claude/skills/` (project scope). Commit that folder if you want your team to share it.
+- Add `-g` to install to `~/.claude/skills/` instead, for every project on your machine.
+- Add `--copy` for independent copies instead of the default symlinks to a canonical copy.
+- Add `-y` to skip prompts. Do not use `--all`: it installs to every detected agent without prompting.
+- Without flags the CLI is interactive: it lists the skills and detected agents and asks you to choose.
+- The full URL also works: `npx skills add https://github.com/gbarnett-hz/agentic-product-function`.
+
+### 3. Start a new Claude Code session
+Skills load at session start. Then follow the [tutorial](#tutorial): `/agentic-product-function lanes=3`, then `/create-prd`.
+
+### Update and remove
+```bash
+npx skills update                      # update installed skills (add -g for global only)
+npx skills remove agentic-product-function create-prd
 ```
 
-- This installs to `./.claude/skills/`. Add `-g` to install to `~/.claude/skills/` for every project instead.
-- Check what a repo offers first with `npx skills add <owner>/<repo> --list`. Update with `npx skills update`, remove with `npx skills remove`.
-- Do not use `--all`: it installs to every detected agent without prompts.
-- The CLI cannot install `deep-research`. It comes from Anthropic's `anthropic-skills` plugin; install that separately.
-- Start a new Claude Code session afterwards so the skills load.
+### Notes
 - `deep-code`, `group-design` and `action-plan` are bundled inside `agentic-product-function/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
-
-Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill agentic-product-function --skill create-prd -a claude-code`.
+- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill agentic-product-function --skill create-prd -a claude-code`.
+- Skills run with full agent permissions. Review them before use.
+- Verified so far: a local-path install. The GitHub route above is untested until the repo is pushed (see [Known gaps](#known-gaps)).
 
 ---
 
