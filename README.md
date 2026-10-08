@@ -61,7 +61,7 @@ npx skills remove agentic-product-function create-prd
 - `deep-code`, `group-design` and `action-plan` are bundled inside `agentic-product-function/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
 - Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill agentic-product-function --skill create-prd -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
-- Verified so far: a local-path install. The GitHub route above is untested until the repo is pushed (see [Known gaps](#known-gaps)).
+- Verified: `--list` and a non-interactive install from `gbarnett-hz/agentic-product-function` on GitHub put both skills in `./.claude/skills/` (as copies, because the run was non-interactive). The installed skills have not been run (see [Known gaps](#known-gaps)).
 
 ---
 
@@ -400,7 +400,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
-- Install is verified only against a local path: `--list` finds both skills, and a `--copy` install of both into a scratch project copies all supporting folders (and not the vendored skills as separate skills). The GitHub `owner/repo` route and the default symlink mode are untested, and the installed skills have not been run.
+- Install is verified from GitHub and from a local path (both skills found and installed with all supporting folders). The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
 - `agentic-team.png` is out of date.
