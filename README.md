@@ -61,7 +61,7 @@ npx skills remove apf-product-foundations apf-start apf-create-prd apf-research
 - `deep-code`, `group-design` and `action-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
 - Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill apf-product-foundations --skill apf-start --skill apf-create-prd --skill apf-research -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
-- Verified: from a local checkout, `--list` finds all four `apf-` skills and a `--copy` install of all four puts them in `./.claude/skills/` with their supporting folders. An earlier GitHub install, before the rename and before `apf-product-foundations` and `apf-research` existed, also worked; the current names have not been tested from GitHub until they are pushed. The installed skills have not been run (see [Known gaps](#known-gaps)).
+- Verified: `--list` and a non-interactive install of all four `apf-` skills from `gbarnett-hz/agentic-product-function` on GitHub put them in `./.claude/skills/` as copies, with their supporting folders (also verified from a local checkout). The installed skills have not been run (see [Known gaps](#known-gaps)).
 
 ---
 
@@ -509,7 +509,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
-- Install is verified from a local path with the current names (all four skills found and installed with all supporting folders). The GitHub route worked before the rename and needs a retest once pushed. The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
+- Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
 - `apf-product-foundations` is untested, as are its `AGENTS.md` managed block and the `CLAUDE.md` `@AGENTS.md` import (that Claude Code resolves it, and that subagents see it, is assumed, not verified). Roles also read the foundation files by explicit path, so they do not depend on it.
 - The research function is untested. It assumes a researcher (a subagent) can spawn its own angle agents; if it cannot, `roles/researcher.md` falls back to doing the angles sequentially itself, which is weaker. Researcher-lane agents are assumed able to message each other (researcher → judge → producer).
