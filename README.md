@@ -25,7 +25,7 @@ See `agentic-team.png` for the original diagram (out of date: lanes are dev+test
 
 ## Install
 
-Two skills ship in this repo: `agentic-product-function` (the team) and `create-prd` (how you write PRDs). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
+Three skills ship in this repo: `product-foundations` (one-time setup of your vision, principles and company context), `agentic-product-function` (the team) and `create-prd` (how you write PRDs). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
 
 **Prerequisites:** Node.js (for `npx`), a git repository with a GitHub remote, `gh` authenticated, `python3`, and Anthropic's `anthropic-skills` plugin (the CLI cannot install it; it provides `deep-research`).
 
@@ -33,13 +33,13 @@ Two skills ship in this repo: `agentic-product-function` (the team) and `create-
 ```bash
 npx skills add gbarnett-hz/agentic-product-function --list
 ```
-You should see two skills: `agentic-product-function` and `create-prd`.
+You should see three skills: `product-foundations`, `agentic-product-function` and `create-prd`.
 
 ### 2. Install into your project
 ```bash
 cd your-project
 npx skills add gbarnett-hz/agentic-product-function \
-  --skill agentic-product-function --skill create-prd -a claude-code
+  --skill product-foundations --skill agentic-product-function --skill create-prd -a claude-code
 ```
 - Installs to `./.claude/skills/` (project scope). Commit that folder if you want your team to share it.
 - Add `-g` to install to `~/.claude/skills/` instead, for every project on your machine.
@@ -49,19 +49,19 @@ npx skills add gbarnett-hz/agentic-product-function \
 - The full URL also works: `npx skills add https://github.com/gbarnett-hz/agentic-product-function`.
 
 ### 3. Start a new Claude Code session
-Skills load at session start. Then follow the [tutorial](#tutorial): `/agentic-product-function lanes=3`, then `/create-prd`.
+Skills load at session start. Then follow the [tutorial](#tutorial): `/product-foundations` once, then `/agentic-product-function lanes=3`, then `/create-prd`.
 
 ### Update and remove
 ```bash
 npx skills update                      # update installed skills (add -g for global only)
-npx skills remove agentic-product-function create-prd
+npx skills remove product-foundations agentic-product-function create-prd
 ```
 
 ### Notes
 - `deep-code`, `group-design` and `action-plan` are bundled inside `agentic-product-function/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
-- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill agentic-product-function --skill create-prd -a claude-code`.
+- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill product-foundations --skill agentic-product-function --skill create-prd -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
-- Verified: `--list` and a non-interactive install from `gbarnett-hz/agentic-product-function` on GitHub put both skills in `./.claude/skills/` (as copies, because the run was non-interactive). The installed skills have not been run (see [Known gaps](#known-gaps)).
+- Verified: `--list` and a non-interactive install from `gbarnett-hz/agentic-product-function` on GitHub put the two skills that existed at the time (`agentic-product-function`, `create-prd`) in `./.claude/skills/`; `product-foundations` was added afterwards and is not yet install-tested (as copies, because the run was non-interactive). The installed skills have not been run (see [Known gaps](#known-gaps)).
 
 ---
 
@@ -74,8 +74,24 @@ Worked example: you want rate limiting on a service's public API.
 - `gh` installed and authenticated (`gh auth status`). GitHub is always the host.
 - The skills installed (see [Install](#install)), including Anthropic's `anthropic-skills` plugin (provides `deep-research`).
 - `python3` (for the PRD watcher).
+- Your project's foundations written (step 1). `/agentic-product-function` stops if they are missing.
 
-### 1. Start the team (do this first)
+### 1. Set up the foundations (once per project)
+```
+/product-foundations
+```
+Before any PRD, the team needs to know what you are building and the rules you hold. The skill interviews you, one document at a time, and drafts each in `drafts/` for your approval:
+- `product-vision.md`: the end goal, who it is for, what it will never be, how success is measured.
+- `product-guiding-principles.md`: hard constraints (for example "Java 21", "zero runtime memory allocation") and judgement principles. Each one gets a rationale, its implications, a **verification** (a lint rule, benchmark or test, or `judgement`) and who may grant exceptions. Hard constraints get IDs (`HC-n`), principles `P-n`.
+- `company-context.md`: the company's execution space and guiding philosophies (customers, strategy, constraints such as compliance, release cadence, approved technologies).
+
+It offers suggestions from your repo (for example Java 21 from a build file) but never writes them as decided without your confirmation. Re-running refines existing files; it never silently overwrites them.
+
+As each file is written it updates a managed block in `AGENTS.md` that references it, and makes sure `CLAUDE.md` imports `@AGENTS.md` (Claude Code reads `CLAUDE.md`, not `AGENTS.md`; it asks before editing an existing `CLAUDE.md`). Commit the files.
+
+From here on the team uses them: architects rule out or flag options that violate a hard constraint, developers and testers adhere to them, and the Verifier checks them.
+
+### 2. Start the team (do this first)
 ```
 /agentic-product-function lanes=3
 ```
@@ -83,15 +99,15 @@ This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .
 
 Start the EM *before* writing the PRD. The watcher treats any PRD that already exists when it first starts as already seen.
 
-### 2. Write the PRD
+### 3. Write the PRD
 ```
 /create-prd
 ```
-The skill orients itself (next ID, vision and research files if present), then interviews you in small batches: problem, goals and non-goals, users, requirements, success metrics, constraints and risks. It pushes back on vague requirements ("fast", "scalable") and asks for a measurable criterion. It keeps requirements to *what*, not *how*. Requirement IDs are `PR-1`, `PR-2`, ...
+The skill orients itself (next ID, the three foundation files, research files if present), then interviews you in small batches: problem, goals and non-goals, users, requirements, success metrics, constraints and risks. It pushes back on vague requirements ("fast", "scalable") and asks for a measurable criterion. It keeps requirements to *what*, not *how*. Requirement IDs are `PR-1`, `PR-2`, ...
 
 It writes `drafts/PRD-001.md` and edits it with you. When you say it is ready, it writes `prds/PRD-001-api-rate-limiting.md` in one write. **That write starts the flow.**
 
-### 3. Architecture runs
+### 4. Architecture runs
 The EM flags the new PRD in one line and hands over to **AExpert** (you now talk to AExpert about architecture). Behind the scenes:
 1. ACore reads your codebase (`deep-code`), writes or refreshes `conventions.md` (your formatters, linters, patterns, and each technology's idiom), then proposes competing designs (`group-design`).
 2. ACloud and ASolution run in parallel on ACore's output (`deep-research`): cloud side effects, and fit in enterprise deployments.
@@ -99,25 +115,25 @@ The EM flags the new PRD in one line and hands over to **AExpert** (you now talk
 
 You can step away. It takes a while.
 
-### 4. Gate 1: pick an option
+### 5. Gate 1: pick an option
 If `conventions.md` is new or changed, AExpert shows it first so you can correct it. Then a short table: one row per option, scored on **risk, complexity, future evolution, fit for purpose**, with links to the detail, plus its recommendation. You can:
 - Pick an option: "Option B".
 - Ask for a scoped re-run: "redo ACloud, assuming multi-region".
 
-### 5. Gate 2: approve the spec
+### 6. Gate 2: approve the spec
 AExpert writes `drafts/SPEC-001.md` in the fixed spec template and shows it to you. Ask for changes in plain language; it edits the draft in place. Every requirement has an ID (`R-1`...) linked to your `PR-n`. When you approve, it moves to `specs/SPEC-001.md`.
 
-### 6. Gate 3: approve the SOP
+### 7. Gate 3: approve the SOP
 SS builds `drafts/SOP-001.md` from the approved spec: one runbook scenario per risk ("if you see X, do Y, roll back with Z"). If a risk has no usable monitoring signal, the SOP records a gap and AExpert fixes the spec first (you re-approve that part).
 
 If you want something in the SOP addressed, say so. AExpert re-runs the architecture flow, scoped to exactly what you asked, and a spec change needs your re-approval of the delta.
 
 When both the spec and SOP are approved, the SOP moves to `sops/SOP-001.md`.
 
-### 7. The plan (no review needed)
+### 8. The plan (no review needed)
 AExpert runs `action-plan` on the approved spec and SOP: test-first steps grouped into waves, parallel by default. It writes `plans/SPEC-001.md` and hands it to the EM. You do not review this.
 
-### 8. Engineering runs
+### 9. Engineering runs
 The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are busy, units queue. For each unit:
 - A worktree is created; the developer works in it following `conventions.md`, runs the format, lint and type checks until clean, and sends the result to its paired tester, who re-runs the checks and reviews idiom.
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
@@ -128,17 +144,18 @@ Check progress any time:
 cat .agentic-team/state.json     # lanes, units, PRD phase, wave, PR URL
 ```
 
-### 9. Verification and the PR
+### 10. Verification and the PR
 The **Verifier** checks the output against every requirement ID and SOP scenario, citing code and test results.
 - **CONFORMS:** the EM pushes `prd/PRD-001` and runs `gh pr create` with a full description (summary, requirement table, SOP link, test results, risks). The URL is in `state.json`. **Review and merge the PR yourself.**
 - **Gaps:** the Requirement Gap flow runs (next section). At most 2 gap cycles, then it escalates to you.
 
-### 10. Next PRD
+### 11. Next PRD
 Just run `/create-prd` again. PRDs run through architecture one at a time (the main session is busy with you), while lanes keep building earlier plans in the background.
 
 ### Troubleshooting
 | Symptom | Cause / fix |
 |---|---|
+| `/agentic-product-function` stops and asks for foundations | The three files are missing from the project root. Run `/product-foundations`. |
 | Wrote a PRD, nothing happened | EM was not running. Start it, then move the PRD out of `prds/` and back in. |
 | Edited a PRD and nothing happened | Edits to a seen PRD are ignored. Drop the revision in as a new file (new ID). |
 | Units not starting | All lanes busy; units queue until a lane reports free. Check `state.json`. |
@@ -170,7 +187,11 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 |---|---|---|---|---|
 | PRD draft | `drafts/PRD-NNN.md` | `create-prd` | YOU | `create-prd/templates/prd.md` |
 | PRD | `prds/PRD-NNN-<slug>.md` | `create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `create-prd/templates/prd.md` |
-| Knowledge repo context | `research/ product-vision company-vision market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
+| Product vision | `product-vision.md` (project root) | `product-foundations` | create-prd, AExpert, architects, Verifier | `product-foundations/templates/product-vision.md` |
+| Guiding principles | `product-guiding-principles.md` (HC-n hard constraints, P-n principles) | `product-foundations` | create-prd, AExpert, architects, SS, developers, testers, Verifier | `product-foundations/templates/product-guiding-principles.md` |
+| Company context | `company-context.md` | `product-foundations` | create-prd, AExpert, ACloud, ASolution, SS | `product-foundations/templates/company-context.md` |
+| Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `product-foundations` | every agent in the project | none |
+| Other knowledge-repo context | `research/ market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
 | Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `action-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
@@ -242,7 +263,8 @@ Each edge is labelled with the artifact it carries. Solid edges form the DAG for
 ```mermaid
 flowchart TD
     subgraph KR["Knowledge repo"]
-        CTX[("research, vision, market-analysis,<br/>codebase, github, web, papers")]
+        CTX[("research, market-analysis,<br/>codebase, github, web, papers")]
+        FND[("product-vision.md<br/>product-guiding-principles.md<br/>company-context.md<br/>AGENTS.md block")]
         PRDS[("prds/")]
         DRAFTS[("drafts/")]
         SPECS[("specs/")]
@@ -250,8 +272,11 @@ flowchart TD
         PLANS[("plans/")]
     end
 
+    YOU -->|"interview answers (once)"| PF[product-foundations]
+    PF -->|"foundation files + AGENTS.md block"| FND
     YOU([YOU]) -->|"interview answers"| CP[create-prd]
-    CTX -->|"vision, research, related PRDs"| CP
+    FND -->|"vision, constraints, context"| CP
+    CTX -->|"research, related PRDs"| CP
     CP -->|"drafts/PRD-NNN.md"| DRAFTS
     DRAFTS -.->|"review, edits"| YOU
     CP -->|"prds/PRD-NNN-slug.md on go-ahead"| PRDS
@@ -291,6 +316,9 @@ flowchart TD
     VER -->|"CONFORMS"| EM
     EM -->|"gh pr create: pr-description.md"| PR([GitHub PR])
     PR -->|"review, merge"| YOU
+    FND -->|"vision, HC-n, P-n, context"| AE
+    FND -->|"HC-n, P-n"| LANES
+    FND -->|"HC-n checks"| VER
 
     VER -.->|"gap-report.md"| EM
     EM -.->|"gap-report.md"| AE
@@ -366,7 +394,7 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 ## Skills and packaging
 
 - **Vendored (copied into `vendor/`, adapted where noted):** `deep-code`, `group-design`, `action-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
-- **Ours:** `agentic-product-function` and `create-prd`.
+- **Ours:** `product-foundations`, `agentic-product-function` and `create-prd`.
 - **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin.
 
 Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `create-prd` is a sibling.
@@ -387,6 +415,9 @@ skills/
   create-prd/                              installed as its own skill
     SKILL.md
     templates/prd.md
+  product-foundations/                     installed as its own skill; run once first
+    SKILL.md
+    templates/                             product-vision, product-guiding-principles, company-context
 ```
 
 The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agentic-team/` live in your project and are created on first run.
@@ -402,5 +433,6 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
 - Install is verified from GitHub and from a local path (both skills found and installed with all supporting folders). The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
+- `product-foundations` is untested, as are its `AGENTS.md` managed block and the `CLAUDE.md` `@AGENTS.md` import (that Claude Code resolves it, and that subagents see it, is assumed, not verified). Roles also read the foundation files by explicit path, so they do not depend on it.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
 - `agentic-team.png` is out of date.

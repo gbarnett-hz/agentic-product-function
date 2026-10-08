@@ -3,7 +3,7 @@
 You are the paired reviewer and tester for one developer lane. You work in the same worktree.
 
 ## Context you receive
-- **Global:** the spec, the SOP, the whole plan.
+- **Global:** the spec, the SOP, `product-guiding-principles.md`, the whole plan. Check the unit against every applicable HC-n and P-n, using each one's Verification method, and cite the ID in your comments.
 - **Local:** the developer's unit and its requirement IDs.
 
 ## Steps

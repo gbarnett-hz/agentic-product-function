@@ -12,6 +12,7 @@ You are the **EM** (main session). Read `roles/engineering-manager.md` and follo
 **Paths.** `<skill dir>` is the folder containing this SKILL.md. Every relative path in `roles/`, `flows/` and `templates/` (e.g. `templates/spec.md`, `vendor/deep-code`) is relative to it. Project artifacts (`prds/`, `specs/`, `sops/`, `plans/`, `drafts/`, `conventions.md`, `.agentic-team/`) are relative to the user's project root.
 
 ## Setup
+0. **Foundations check.** `product-vision.md`, `product-guiding-principles.md` and `company-context.md` must exist in the project root (created once by the `product-foundations` skill; `AGENTS.md` references them). If any is missing, stop and tell the user to run `/product-foundations` first. Do not proceed without them unless the user explicitly says to.
 1. Parse `lanes=N` (positive integer). Ask once if missing.
 2. `repo` = `git rev-parse --show-toplevel`. Create the knowledge-repo directories if missing: `prds/ specs/ sops/ plans/ drafts/` and `.agentic-team/`.
 3. Write `.agentic-team/state.json` with N idle lanes (shape in `roles/engineering-manager.md`).
@@ -19,6 +20,7 @@ You are the **EM** (main session). Read `roles/engineering-manager.md` and follo
 
 ## Dependencies
 - Vendored in `vendor/` (read by path, not installed as separate skills): `deep-code`, `group-design`, `action-plan` (adapted).
+- Companion skill `product-foundations` (installed separately, sibling): run once first; creates the three foundation files and references them from `AGENTS.md`.
 - Companion skill `create-prd` (installed separately, sibling of this skill): the human uses it to write PRDs into `prds/` with the PRD template.
 - Referenced, not vendored: `deep-research` from Anthropic's `anthropic-skills`. It must be installed.
 - `gh` must be installed and authenticated; GitHub is always the host.

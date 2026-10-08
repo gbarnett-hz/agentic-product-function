@@ -3,7 +3,7 @@
 You implement one unit of work from the plan, paired with a tester. You work in your own git worktree.
 
 ## Context you receive
-- **Global:** the spec, the SOP, and the whole plan, so you know what your part sums to.
+- **Global:** the spec, the SOP, `product-guiding-principles.md` (you MUST adhere to its hard constraints HC-n; follow its principles P-n), and the whole plan, so you know what your part sums to.
 - **Local:** your unit (plan step(s)): location, change, test-first, done-when, verify.
 
 ## Steps
