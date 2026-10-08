@@ -10,15 +10,36 @@ See `agentic-team.png` for the original diagram (out of date: lanes are dev+test
 
 ## Contents
 
-1. [Tutorial](#tutorial)
-2. [Players](#players)
-3. [Artifacts: who writes and reads what](#artifacts-who-writes-and-reads-what)
-4. [Flows](#flows)
-5. [Data-flow DAGs](#data-flow-dags)
-6. [Rules and caps](#rules-and-caps)
-7. [Document standards](#document-standards)
-8. [Skills and packaging](#skills-and-packaging)
-9. [Known gaps](#known-gaps)
+1. [Install](#install)
+2. [Tutorial](#tutorial)
+3. [Players](#players)
+4. [Artifacts: who writes and reads what](#artifacts-who-writes-and-reads-what)
+5. [Flows](#flows)
+6. [Data-flow DAGs](#data-flow-dags)
+7. [Rules and caps](#rules-and-caps)
+8. [Document standards](#document-standards)
+9. [Skills and packaging](#skills-and-packaging)
+10. [Known gaps](#known-gaps)
+
+---
+
+## Install
+
+Two skills ship in this repo: `agentic-product-function` (the team) and `create-prd` (how you write PRDs). Install both into your project with the [skills CLI](https://github.com/vercel-labs/skills):
+
+```bash
+cd your-project            # a git repo with a GitHub remote
+npx skills add <owner>/<repo> --skill agentic-product-function --skill create-prd -a claude-code
+```
+
+- This installs to `./.claude/skills/`. Add `-g` to install to `~/.claude/skills/` for every project instead.
+- Check what a repo offers first with `npx skills add <owner>/<repo> --list`. Update with `npx skills update`, remove with `npx skills remove`.
+- Do not use `--all`: it installs to every detected agent without prompts.
+- The CLI cannot install `deep-research`. It comes from Anthropic's `anthropic-skills` plugin; install that separately.
+- Start a new Claude Code session afterwards so the skills load.
+- `deep-code`, `group-design` and `action-plan` are bundled inside `agentic-product-function/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
+
+Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill agentic-product-function --skill create-prd -a claude-code`.
 
 ---
 
@@ -29,7 +50,7 @@ Worked example: you want rate limiting on a service's public API.
 ### 0. Prerequisites
 - A git repository containing the codebase the feature changes (ACore reads it). Run Claude Code from its root.
 - `gh` installed and authenticated (`gh auth status`). GitHub is always the host.
-- Anthropic's `anthropic-skills` plugin installed (provides `deep-research`).
+- The skills installed (see [Install](#install)), including Anthropic's `anthropic-skills` plugin (provides `deep-research`).
 - `python3` (for the PRD watcher).
 
 ### 1. Start the team (do this first)
@@ -125,8 +146,8 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 
 | Artifact | Path (in your project) | Written by | Read by | Template |
 |---|---|---|---|---|
-| PRD draft | `drafts/PRD-NNN.md` | `create-prd` | YOU | `templates/prd.md` |
-| PRD | `prds/PRD-NNN-<slug>.md` | `create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `templates/prd.md` |
+| PRD draft | `drafts/PRD-NNN.md` | `create-prd` | YOU | `create-prd/templates/prd.md` |
+| PRD | `prds/PRD-NNN-<slug>.md` | `create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `create-prd/templates/prd.md` |
 | Knowledge repo context | `research/ product-vision company-vision market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
 | Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `action-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
@@ -136,7 +157,7 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 | Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SS, `action-plan`, lanes, integrator, Verifier | `templates/spec.md` |
 | SOP draft | `drafts/SOP-NNN.md` | SS | YOU, AExpert | `templates/sop.md` |
 | SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `action-plan`, lanes, integrator, Verifier | `templates/sop.md` |
-| Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `action-plan` | EM, lanes, integrator | `skills/action-plan` |
+| Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `action-plan` | EM, lanes, integrator | `vendor/action-plan` |
 | Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt` | EM only | EM | `roles/engineering-manager.md` |
 | Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | integrator, Verifier | none |
 | Handoff package | in the integrator's prompt | EM | integrator | `templates/handoff-package.md` |
@@ -322,20 +343,28 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 
 ## Skills and packaging
 
-- **Vendored (copied into this repo, adapted where noted):** `deep-code`, `group-design`, `action-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped).
-- **Ours:** `create-prd`.
+- **Vendored (copied into `vendor/`, adapted where noted):** `deep-code`, `group-design`, `action-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
+- **Ours:** `agentic-product-function` and `create-prd`.
 - **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin.
 
-One distributable skill (skills.sh):
+Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `create-prd` is a sibling.
 
 ```
-SKILL.md              entry point: /agentic-product-function lanes=N
-roles/                engineering-manager, architect-chief, architect-core, architect-cloud,
-                      architect-solution, support-sop, developer, tester, integrator, verifier
-flows/                architecture.md, engineering.md, requirement-gap.md
-templates/            prd, spec, sop, conventions, option-table, gap-report, handoff-package, pr-description
-skills/               deep-code, group-design, action-plan (vendored); create-prd (ours)
-scripts/watch-prds.py kqueue watcher (poll fallback elsewhere)
+README.md  logo.jpg  agentic-team.png      repo docs (not part of any skill)
+skills/
+  agentic-product-function/                installed as one skill; the whole folder is copied
+    SKILL.md                               entry point: /agentic-product-function lanes=N
+    roles/                                 engineering-manager, architect-chief, architect-core,
+                                           architect-cloud, architect-solution, support-sop,
+                                           developer, tester, integrator, verifier
+    flows/                                 architecture.md, engineering.md, requirement-gap.md
+    templates/                             spec, sop, conventions, option-table, gap-report,
+                                           handoff-package, pr-description
+    vendor/                                deep-code, group-design, action-plan (read by path)
+    scripts/watch-prds.py                  kqueue watcher (poll fallback elsewhere)
+  create-prd/                              installed as its own skill
+    SKILL.md
+    templates/prd.md
 ```
 
 The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agentic-team/` live in your project and are created on first run.
@@ -349,4 +378,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
+- Install is verified only against a local path: `--list` finds both skills, and a `--copy` install of both into a scratch project copies all supporting folders (and not the vendored skills as separate skills). The GitHub `owner/repo` route and the default symlink mode are untested, and the installed skills have not been run.
+- Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
+- Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
 - `agentic-team.png` is out of date.

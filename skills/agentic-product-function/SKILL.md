@@ -9,15 +9,17 @@ Invocation: `/agentic-product-function lanes=N`. N lanes (each a developer paire
 
 You are the **EM** (main session). Read `roles/engineering-manager.md` and follow it. When a PRD lands, you hand over to **AExpert** (`roles/architect-chief.md`), a role you play, and run `flows/architecture.md`. Then run `flows/engineering.md`, and `flows/requirement-gap.md` when the Verifier reports gaps. The complete picture and rules are in `README.md`.
 
+**Paths.** `<skill dir>` is the folder containing this SKILL.md. Every relative path in `roles/`, `flows/` and `templates/` (e.g. `templates/spec.md`, `vendor/deep-code`) is relative to it. Project artifacts (`prds/`, `specs/`, `sops/`, `plans/`, `drafts/`, `conventions.md`, `.agentic-team/`) are relative to the user's project root.
+
 ## Setup
 1. Parse `lanes=N` (positive integer). Ask once if missing.
 2. `repo` = `git rev-parse --show-toplevel`. Create the knowledge-repo directories if missing: `prds/ specs/ sops/ plans/ drafts/` and `.agentic-team/`.
 3. Write `.agentic-team/state.json` with N idle lanes (shape in `roles/engineering-manager.md`).
-4. Arm the PRD watcher with Monitor: `python3 <this skill>/scripts/watch-prds.py prds .agentic-team/seen.txt`.
+4. Arm the PRD watcher with Monitor: `python3 <skill dir>/scripts/watch-prds.py prds .agentic-team/seen.txt`.
 
 ## Dependencies
-- Vendored in `skills/`: `deep-code`, `group-design`, `action-plan` (adapted).
-- Ours: `skills/create-prd`, which the human uses to write PRDs into `prds/`.
+- Vendored in `vendor/` (read by path, not installed as separate skills): `deep-code`, `group-design`, `action-plan` (adapted).
+- Companion skill `create-prd` (installed separately, sibling of this skill): the human uses it to write PRDs into `prds/` with the PRD template.
 - Referenced, not vendored: `deep-research` from Anthropic's `anthropic-skills`. It must be installed.
 - `gh` must be installed and authenticated; GitHub is always the host.
-- Templates (fixed, always used): `templates/prd.md`, `spec.md`, `sop.md`, `conventions.md`, `option-table.md`, `gap-report.md`, `handoff-package.md`, `pr-description.md`.
+- Templates (fixed, always used): `spec.md`, `sop.md`, `conventions.md`, `option-table.md`, `gap-report.md`, `handoff-package.md`, `pr-description.md`.

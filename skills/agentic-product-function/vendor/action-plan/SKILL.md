@@ -123,7 +123,7 @@ Spawn **at least two** fresh `general-purpose` planner agents in one message so 
 
 Prompt for each:
 
-> Read the plan skeleton at `<plan path>` and the action-plan spec at `~/.claude/skills/action-plan/SKILL.md` (section 4: the Todo, Parallel execution and Testing formats, and the Rules). Your strategy: `<strategy text>`. Using the codebase to confirm every reference, write a candidate containing only `## Todo`, `## Parallel execution` (leave Execution mode blank), and `## Testing` to `<plan path minus .md>.candidate-<A|B|C>.md`. Follow every Rule: reproducer first, "Confirm the objective" last, TDD gate per step, integration tests for cross-boundary steps, `file:line` citations, and wave analysis checked against the actual files. Do not edit the skeleton or any source files. Reply with the candidate path, step count, N, and widest wave.
+> Read the plan skeleton at `<plan path>` and the action-plan spec (the SKILL.md you were launched from: `<path to this action-plan/SKILL.md>`, resolved to the vendored copy under `vendor/action-plan/`) (section 4: the Todo, Parallel execution and Testing formats, and the Rules). Your strategy: `<strategy text>`. Using the codebase to confirm every reference, write a candidate containing only `## Todo`, `## Parallel execution` (leave Execution mode blank), and `## Testing` to `<plan path minus .md>.candidate-<A|B|C>.md`. Follow every Rule: reproducer first, "Confirm the objective" last, TDD gate per step, integration tests for cross-boundary steps, `file:line` citations, and wave analysis checked against the actual files. Do not edit the skeleton or any source files. Reply with the candidate path, step count, N, and widest wave.
 
 ## 6. Validate each candidate
 

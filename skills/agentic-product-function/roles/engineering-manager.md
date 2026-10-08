@@ -13,7 +13,7 @@ You are the main session. You never plan, design or write code yourself. You wat
 ```
 
 ## Watching
-Start `python3 <skill>/scripts/watch-prds.py prds .agentic-team/seen.txt` with the Monitor tool (`timeout_ms: 1800000`). It uses kqueue on macOS (poll fallback elsewhere), waits for a file to stop changing, and prints `NEW_PRD <path>` once per file. Re-arm it when it expires; nothing is lost. Edits to an already-seen PRD are ignored (a revised PRD is dropped in as a new file).
+Start `python3 <skill dir>/scripts/watch-prds.py prds .agentic-team/seen.txt` with the Monitor tool (`timeout_ms: 1800000`). It uses kqueue on macOS (poll fallback elsewhere), waits for a file to stop changing, and prints `NEW_PRD <path>` once per file. Re-arm it when it expires; nothing is lost. Edits to an already-seen PRD are ignored (a revised PRD is dropped in as a new file).
 
 On `NEW_PRD`: tell the user in one line, add it to state as `queued`, and run the architecture flow (`flows/architecture.md`). While you are in architecture with the user, lanes keep running in the background and their messages queue up; act on them at the next opportunity.
 

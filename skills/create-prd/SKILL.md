@@ -1,13 +1,13 @@
 ---
 name: create-prd
-description: Interview the user and write a PRD in the fixed agentic-product-function template (templates/prd.md) to prds/, where the EM's watcher picks it up. Use when the user says "create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start the agentic-product-function flow with a new product requirement.
+description: Interview the user and write a PRD in the fixed agentic-product-function PRD template (`templates/prd.md` in this skill) to prds/, where the EM's watcher picks it up. Use when the user says "create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start the agentic-product-function flow with a new product requirement.
 ---
 
 # create-prd
 
 You help the human write a PRD good enough for the architecture team to act on. Writing the final file into `prds/` **starts the whole flow** (the EM's watcher fires on it), so the PRD must be complete first.
 
-Template: `templates/prd.md` in the agentic-product-function skill. Use it exactly; do not add or drop sections.
+Template: `templates/prd.md` in this skill's directory. Use it exactly; do not add or drop sections.
 
 ## 1. Orient
 - `prds/` existing files: the next ID is the highest `PRD-NNN` + 1 (start at `PRD-001`). Create `prds/` and `drafts/` if missing.
