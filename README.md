@@ -198,6 +198,7 @@ RFC/design-doc style plus a MADR decision record.
   - `deep-code`
   - `group-design`
   - `action-plan`: AExpert builds the skeleton from the approved spec and SOP (not the chat), writes to `plans/`, and the "parallel agents?" question is skipped (parallel by default).
+- **Ours:** `create-prd` (`skills/create-prd`): interviews you, drafts to `drafts/PRD-NNN.md`, and on your go-ahead writes the PRD to `prds/` using `templates/prd.md`. That write starts the flow, so start the EM first.
 - **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin as well.
 
 ## Packaging
