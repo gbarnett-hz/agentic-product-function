@@ -1,3 +1,5 @@
+<p align="center"><img src="logo.jpg" alt="agentic-product-function logo" width="240"></p>
+
 # agentic-product-function
 
 A skill that models a product function as a team of agents. You write a PRD. An architect team assesses it, you approve an option, a spec and an SOP at three gates, and a fixed pool of developer+tester lanes builds it in git worktrees, verifies it against the PRD, spec and SOP, and opens a GitHub PR with `gh`.
