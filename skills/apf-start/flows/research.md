@@ -25,5 +25,5 @@ research/RR-NNN-slug.md ─(NEW_RESEARCH)─► EM ─► idle researcher lane R
 - No human gate in this flow. If a request is ambiguous the researcher records its assumption and continues; the spike lists assumptions and gaps. The user reads the result and decides.
 - A crashed or stalled lane: the EM reassigns the request to another idle researcher lane.
 - Spikes recommend; they never make decisions for the human.
-- Architects, `create-prd` and `/research` read `spikes/` as research context.
+- Architects, `apf-create-prd` and `/apf-research` read `spikes/` as research context.
 - Spikes are left in the working tree; committing them is up to the user.

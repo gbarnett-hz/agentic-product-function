@@ -1,9 +1,9 @@
 ---
-name: create-prd
-description: Interview the user and write a PRD in the fixed agentic-product-function PRD template (`templates/prd.md` in this skill) to prds/, where the EM's watcher picks it up. Use when the user says "create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start the agentic-product-function flow with a new product requirement.
+name: apf-create-prd
+description: Interview the user and write a PRD in the fixed apf-start PRD template (`templates/prd.md` in this skill) to prds/, where the EM's watcher picks it up. Use when the user says "apf-create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start the apf-start flow with a new product requirement.
 ---
 
-# create-prd
+# apf-create-prd
 
 You help the human write a PRD good enough for the architecture team to act on. Writing the final file into `prds/` **starts the whole flow** (the EM's watcher fires on it), so the PRD must be complete first.
 
@@ -11,7 +11,7 @@ Template: `templates/prd.md` in this skill's directory. Use it exactly; do not a
 
 ## 1. Orient
 - `prds/` existing files: the next ID is the highest `PRD-NNN` + 1 (start at `PRD-001`). Create `prds/` and `drafts/` if missing.
-- Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` if present (created by `/product-foundations`; if absent, suggest running it first, but do not block). Skim `spikes/` (completed research: `docs/` and `projects/`), `market-analysis` and related PRDs; if the PRD needs research that does not exist yet, suggest `/research` first. Ask only what they do not answer.
+- Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` if present (created by `/apf-product-foundations`; if absent, suggest running it first, but do not block). Skim `spikes/` (completed research: `docs/` and `projects/`), `market-analysis` and related PRDs; if the PRD needs research that does not exist yet, suggest `/apf-research` first. Ask only what they do not answer.
 - Keep the PRD consistent with them. If a requirement the user wants conflicts with the vision or a hard constraint (HC-n), say so and let the user decide; record the conflict under Risks and open questions.
 - If the user brought notes, a ticket or a rough idea, start from that.
 
@@ -37,4 +37,4 @@ Write the draft to `drafts/PRD-NNN.md` (not `prds/`). Show it to the user and ed
 Only when the user says it is ready:
 1. Set Status to `Ready`, set the date.
 2. Write it to `prds/PRD-NNN-<short-slug>.md` in a single write (the watcher waits for the file to settle, but a single write is safest). Remove the draft.
-3. Tell the user the path. The EM picks it up only if it is already running (`/agentic-product-function lanes=N`): the watcher treats any PRD that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `prds/`.
+3. Tell the user the path. The EM picks it up only if it is already running (`/apf-start lanes=N`): the watcher treats any PRD that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `prds/`.

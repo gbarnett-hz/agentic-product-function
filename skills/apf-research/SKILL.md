@@ -1,9 +1,9 @@
 ---
-name: research
-description: Interview the user and write a research request in the fixed spike-request template to research/, where the EM's watcher hands it to a team of researchers. The result is a spike (a document or a small project) in spikes/. Use when the user says "/research", "research this", "run a spike", "investigate X", "I need a spike on", or wants the agentic team's researchers to look into a question thoroughly, adversarially and objectively.
+name: apf-research
+description: Interview the user and write a research request in the fixed spike-request template to research/, where the EM's watcher hands it to a team of researchers. The result is a spike (a document or a small project) in spikes/. Use when the user says "/apf-research", "research this", "run a spike", "investigate X", "I need a spike on", or wants the agentic team's researchers to look into a question thoroughly, adversarially and objectively.
 ---
 
-# research
+# apf-research
 
 You help the human write a research request good enough for a researcher to take in its entirety and close with a document or a small project. Writing the final file into `research/` **starts the research flow** (the EM's watcher fires on it), so the request must be complete first.
 
@@ -11,7 +11,7 @@ Template: `templates/research-request.md` in this skill's directory. Use it exac
 
 ## 1. Orient
 - `research/` existing files: the next ID is the highest `RR-NNN` + 1 (start at `RR-001`). Create `research/` and `drafts/` if missing.
-- Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` if present (created by `/product-foundations`). Skim `prds/`, `specs/` and `spikes/` for related work, so you do not request research that already exists. If a matching spike exists, show it to the user and ask whether to extend it.
+- Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` if present (created by `/apf-product-foundations`). Skim `prds/`, `specs/` and `spikes/` for related work, so you do not request research that already exists. If a matching spike exists, show it to the user and ask whether to extend it.
 - If the user brought notes, a ticket, or a rough idea, start from that.
 
 ## 2. Interview
@@ -39,5 +39,5 @@ Write the draft to `drafts/RR-NNN.md` (not `research/`). Show it to the user and
 Only when the user says it is ready:
 1. Set Status to `Ready`, set the date.
 2. Write it to `research/RR-NNN-<short-slug>.md` in a single write. Remove the draft.
-3. Tell the user the path. The EM picks it up only if it is already running with researchers (`/agentic-product-function lanes=N researchers=M`, M ≥ 1): the watcher treats any request that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `research/`.
+3. Tell the user the path. The EM picks it up only if it is already running with researchers (`/apf-start lanes=N researchers=M`, M ≥ 1): the watcher treats any request that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `research/`.
 4. Say where the result will appear: `spikes/docs/RR-NNN-<slug>.md` or `spikes/projects/RR-NNN-<slug>/`.

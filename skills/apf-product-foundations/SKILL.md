@@ -1,11 +1,11 @@
 ---
-name: product-foundations
-description: One-time interactive setup that creates a project's product-vision.md, product-guiding-principles.md and company-context.md with the user, then references them from AGENTS.md. Run it once, before /agentic-product-function or /create-prd. Use when the user says "product-foundations", "set up the product vision", "write our guiding principles", "set up company context", or is starting a new project for the agentic team and has none of these files.
+name: apf-product-foundations
+description: One-time interactive setup that creates a project's product-vision.md, product-guiding-principles.md and company-context.md with the user, then references them from AGENTS.md. Run it once, before /apf-start or /apf-create-prd. Use when the user says "apf-product-foundations", "set up the product vision", "write our guiding principles", "set up company context", or is starting a new project for the agentic team and has none of these files.
 ---
 
-# product-foundations
+# apf-product-foundations
 
-You help the human write the three documents every agent in the team is grounded in. Run once per project, before `/agentic-product-function` and `/create-prd`. Re-running refines existing files; it never silently overwrites them.
+You help the human write the three documents every agent in the team is grounded in. Run once per project, before `/apf-start` and `/apf-create-prd`. Re-running refines existing files; it never silently overwrites them.
 
 | File (project root) | What it holds | Template |
 |---|---|---|
@@ -45,7 +45,7 @@ Push back on principles that cannot be checked or that contradict each other, an
 After each file is written, update the managed block in `AGENTS.md` at the project root so it lists exactly the foundation files that exist. If `AGENTS.md` is missing, create it containing only the block. Replace what is between the markers; never touch anything outside them.
 
 ```markdown
-<!-- product-foundations:start -->
+<!-- apf-product-foundations:start -->
 ## Product foundations
 Read these before planning, designing or writing code. They are the source of truth for what we build and the constraints we hold.
 - [product-vision.md](product-vision.md): the end goal, who it is for, and how success is measured.
@@ -53,7 +53,7 @@ Read these before planning, designing or writing code. They are the source of tr
 - [company-context.md](company-context.md): the company's execution space and guiding philosophies.
 
 If a request conflicts with a hard constraint in the guiding principles, stop and raise it instead of working around it.
-<!-- product-foundations:end -->
+<!-- apf-product-foundations:end -->
 ```
 (List only the files that exist.)
 
@@ -63,4 +63,4 @@ Claude Code reads `CLAUDE.md`, not `AGENTS.md`. Check for `CLAUDE.md`:
 - Already imports it: nothing to do.
 
 ## 5. Finish
-Tell the user which files were written, that `AGENTS.md` now references them, and the next steps: `/agentic-product-function lanes=N`, then `/create-prd`. Suggest committing the files.
+Tell the user which files were written, that `AGENTS.md` now references them, and the next steps: `/apf-start lanes=N`, then `/apf-create-prd`. Suggest committing the files.

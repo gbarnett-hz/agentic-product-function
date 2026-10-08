@@ -25,7 +25,7 @@ See `agentic-team.png` for the original diagram (out of date: lanes are dev+test
 
 ## Install
 
-Four skills ship in this repo: `product-foundations` (one-time setup of your vision, principles and company context), `agentic-product-function` (the team) `create-prd` (how you write PRDs) and `research` (how you request research). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
+Four skills ship in this repo: `apf-product-foundations` (one-time setup of your vision, principles and company context), `apf-start` (the team), `apf-create-prd` (how you write PRDs) and `apf-research` (how you request research). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
 
 **Prerequisites:** Node.js (for `npx`), a git repository with a GitHub remote, `gh` authenticated, `python3`, and Anthropic's `anthropic-skills` plugin (the CLI cannot install it; it provides `deep-research`).
 
@@ -33,13 +33,13 @@ Four skills ship in this repo: `product-foundations` (one-time setup of your vis
 ```bash
 npx skills add gbarnett-hz/agentic-product-function --list
 ```
-You should see four skills: `product-foundations`, `agentic-product-function`, `create-prd` and `research`.
+You should see four skills: `apf-product-foundations`, `apf-start`, `apf-create-prd` and `apf-research`.
 
 ### 2. Install into your project
 ```bash
 cd your-project
 npx skills add gbarnett-hz/agentic-product-function \
-  --skill product-foundations --skill agentic-product-function --skill create-prd --skill research -a claude-code
+  --skill apf-product-foundations --skill apf-start --skill apf-create-prd --skill apf-research -a claude-code
 ```
 - Installs to `./.claude/skills/` (project scope). Commit that folder if you want your team to share it.
 - Add `-g` to install to `~/.claude/skills/` instead, for every project on your machine.
@@ -49,19 +49,19 @@ npx skills add gbarnett-hz/agentic-product-function \
 - The full URL also works: `npx skills add https://github.com/gbarnett-hz/agentic-product-function`.
 
 ### 3. Start a new Claude Code session
-Skills load at session start. Then follow the [tutorial](#tutorial): `/product-foundations` once, then `/agentic-product-function lanes=3 researchers=2`, then `/create-prd` or `/research`.
+Skills load at session start. Then follow the [tutorial](#tutorial): `/apf-product-foundations` once, then `/apf-start lanes=3 researchers=2`, then `/apf-create-prd` or `/apf-research`.
 
 ### Update and remove
 ```bash
 npx skills update                      # update installed skills (add -g for global only)
-npx skills remove product-foundations agentic-product-function create-prd research
+npx skills remove apf-product-foundations apf-start apf-create-prd apf-research
 ```
 
 ### Notes
-- `deep-code`, `group-design` and `action-plan` are bundled inside `agentic-product-function/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
-- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill product-foundations --skill agentic-product-function --skill create-prd --skill research -a claude-code`.
+- `deep-code`, `group-design` and `action-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
+- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill apf-product-foundations --skill apf-start --skill apf-create-prd --skill apf-research -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
-- Verified: `--list` and a non-interactive install from `gbarnett-hz/agentic-product-function` on GitHub put the two skills that existed at the time (`agentic-product-function`, `create-prd`) in `./.claude/skills/`; `product-foundations` was added afterwards and is not yet install-tested (as copies, because the run was non-interactive). The installed skills have not been run (see [Known gaps](#known-gaps)).
+- Verified: from a local checkout, `--list` finds all four `apf-` skills and a `--copy` install of all four puts them in `./.claude/skills/` with their supporting folders. An earlier GitHub install, before the rename and before `apf-product-foundations` and `apf-research` existed, also worked; the current names have not been tested from GitHub until they are pushed. The installed skills have not been run (see [Known gaps](#known-gaps)).
 
 ---
 
@@ -74,11 +74,11 @@ Worked example: you want rate limiting on a service's public API.
 - `gh` installed and authenticated (`gh auth status`). GitHub is always the host.
 - The skills installed (see [Install](#install)), including Anthropic's `anthropic-skills` plugin (provides `deep-research`).
 - `python3` (for the PRD watcher).
-- Your project's foundations written (step 1). `/agentic-product-function` stops if they are missing.
+- Your project's foundations written (step 1). `/apf-start` stops if they are missing.
 
 ### 1. Set up the foundations (once per project)
 ```
-/product-foundations
+/apf-product-foundations
 ```
 Before any PRD, the team needs to know what you are building and the rules you hold. The skill interviews you, one document at a time, and drafts each in `drafts/` for your approval:
 - `product-vision.md`: the end goal, who it is for, what it will never be, how success is measured.
@@ -93,7 +93,7 @@ From here on the team uses them: architects rule out or flag options that violat
 
 ### 2. Start the team (do this first)
 ```
-/agentic-product-function lanes=3 researchers=2
+/apf-start lanes=3 researchers=2
 ```
 This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` (and, when researchers ≥ 1, `research/ spikes/docs/ spikes/projects/`) if missing, writes `.agentic-team/state.json` with 3 idle engineering lanes and 2 idle researcher lanes, and arms the watchers for `prds/` and `research/`. 3 lanes means 3 developers, each paired with a tester. 2 researchers means 2 researcher lanes, each with its own researcher, judge, doc writer and research engineer. Capacity is fixed for the session; `researchers=0` turns research off.
 
@@ -101,7 +101,7 @@ Start the EM *before* writing the PRD. The watchers treat any PRD or research re
 
 ### 3. Write the PRD
 ```
-/create-prd
+/apf-create-prd
 ```
 The skill orients itself (next ID, the three foundation files, research files if present), then interviews you in small batches: problem, goals and non-goals, users, requirements, success metrics, constraints and risks. It pushes back on vague requirements ("fast", "scalable") and asks for a measurable criterion. It keeps requirements to *what*, not *how*. Requirement IDs are `PR-1`, `PR-2`, ...
 
@@ -150,11 +150,11 @@ The **Verifier** checks the output against every requirement ID and SOP scenario
 - **Gaps:** the Requirement Gap flow runs (next section). At most 2 gap cycles, then it escalates to you.
 
 ### 11. Next PRD
-Just run `/create-prd` again. PRDs run through architecture one at a time (the main session is busy with you), while lanes keep building earlier plans in the background.
+Just run `/apf-create-prd` again. PRDs run through architecture one at a time (the main session is busy with you), while lanes keep building earlier plans in the background.
 
 ### 12. Run a spike (research)
 ```
-/research
+/apf-research
 ```
 The skill interviews you and writes a research request in the fixed template: objective, specific research questions (`Q-1`...), context, scope, sources to consult, depth (`quick` / `standard` / `deep`), exit criteria, deliverable (`document`, `project` or `judge decides`) and constraints. When you approve, it writes `research/RR-001-<slug>.md`, which the EM picks up.
 
@@ -162,12 +162,12 @@ An idle researcher lane takes the whole request. Its **researcher** investigates
 - a **research doc writer** writes `spikes/docs/RR-001-<slug>.md`, or
 - a **research engineer** builds and runs `spikes/projects/RR-001-<slug>/`.
 
-The EM tells you the artifact path when the lane is free again. There is no human gate: read the spike and decide. Architects and `/create-prd` read `spikes/` as context for later work. Spikes are left uncommitted in your working tree.
+The EM tells you the artifact path when the lane is free again. There is no human gate: read the spike and decide. Architects and `/apf-create-prd` read `spikes/` as context for later work. Spikes are left uncommitted in your working tree.
 
 ### Troubleshooting
 | Symptom | Cause / fix |
 |---|---|
-| `/agentic-product-function` stops and asks for foundations | The three files are missing from the project root. Run `/product-foundations`. |
+| `/apf-start` stops and asks for foundations | The three files are missing from the project root. Run `/apf-product-foundations`. |
 | Wrote a PRD, nothing happened | EM was not running. Start it, then move the PRD out of `prds/` and back in. |
 | Edited a PRD and nothing happened | Edits to a seen PRD are ignored. Drop the revision in as a new file (new ID). |
 | Wrote a research request, nothing happened | The EM was not running with `researchers` ≥ 1. Start it, then move the request out of `research/` and back in. |
@@ -182,7 +182,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 
 | Agent | Role |
 |---|---|
-| **YOU** | Human in the loop. Write PRDs (with `create-prd`), make every approval decision at gates 1-3. |
+| **YOU** | Human in the loop. Write PRDs (with `apf-create-prd`), make every approval decision at gates 1-3. |
 | **EM** (engineering-manager) | The main session. Watches `prds/` (kqueue on macOS, poll fallback elsewhere, via Monitor), starts the flow, hands control to AExpert, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. |
 | **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `action-plan`. A role the main session plays after the EM hands over. |
 | **ACore** (architect-core) | `deep-code` to understand the codebase against the PRD, then `group-design` to formulate candidate designs. |
@@ -204,13 +204,13 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 
 | Artifact | Path (in your project) | Written by | Read by | Template |
 |---|---|---|---|---|
-| PRD draft | `drafts/PRD-NNN.md` | `create-prd` | YOU | `create-prd/templates/prd.md` |
-| PRD | `prds/PRD-NNN-<slug>.md` | `create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `create-prd/templates/prd.md` |
-| Product vision | `product-vision.md` (project root) | `product-foundations` | create-prd, AExpert, architects, Verifier | `product-foundations/templates/product-vision.md` |
-| Guiding principles | `product-guiding-principles.md` (HC-n hard constraints, P-n principles) | `product-foundations` | create-prd, AExpert, architects, SS, developers, testers, Verifier | `product-foundations/templates/product-guiding-principles.md` |
-| Company context | `company-context.md` | `product-foundations` | create-prd, AExpert, ACloud, ASolution, SS | `product-foundations/templates/company-context.md` |
-| Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `product-foundations` | every agent in the project | none |
-| Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
+| PRD draft | `drafts/PRD-NNN.md` | `apf-create-prd` | YOU | `apf-create-prd/templates/prd.md` |
+| PRD | `prds/PRD-NNN-<slug>.md` | `apf-create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `apf-create-prd/templates/prd.md` |
+| Product vision | `product-vision.md` (project root) | `apf-product-foundations` | apf-create-prd, AExpert, architects, Verifier | `apf-product-foundations/templates/product-vision.md` |
+| Guiding principles | `product-guiding-principles.md` (HC-n hard constraints, P-n principles) | `apf-product-foundations` | apf-create-prd, AExpert, architects, SS, developers, testers, Verifier | `apf-product-foundations/templates/product-guiding-principles.md` |
+| Company context | `company-context.md` | `apf-product-foundations` | apf-create-prd, AExpert, ACloud, ASolution, SS | `apf-product-foundations/templates/company-context.md` |
+| Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `apf-product-foundations` | every agent in the project | none |
+| Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | apf-create-prd, AExpert, architects | none |
 | Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `action-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
@@ -220,11 +220,11 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | SOP draft | `drafts/SOP-NNN.md` | SS | YOU, AExpert | `templates/sop.md` |
 | SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `action-plan`, lanes, integrator, Verifier | `templates/sop.md` |
 | Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `action-plan` | EM, lanes, integrator | `vendor/action-plan` |
-| Research request draft | `drafts/RR-NNN.md` | `research` | YOU | `research/templates/research-request.md` |
-| Research request | `research/RR-NNN-<slug>.md` | `research` (on your go-ahead) | watcher → EM, researcher, research-judge | `research/templates/research-request.md` |
+| Research request draft | `drafts/RR-NNN.md` | `apf-research` | YOU | `research/templates/research-request.md` |
+| Research request | `research/RR-NNN-<slug>.md` | `apf-research` (on your go-ahead) | watcher → EM, researcher, research-judge | `research/templates/research-request.md` |
 | Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, research-judge | research-judge, doc writer, engineer | none |
-| Spike document | `spikes/docs/RR-NNN-<slug>.md` | research-doc-writer | YOU, architects, `create-prd`, `research` | `templates/spike-document.md` |
-| Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | research-engineer | YOU, architects, `create-prd`, `research` | `templates/spike-project-readme.md` |
+| Spike document | `spikes/docs/RR-NNN-<slug>.md` | research-doc-writer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-document.md` |
+| Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | research-engineer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-project-readme.md` |
 | Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt`, `.agentic-team/seen-research.txt` | EM only | EM | `roles/engineering-manager.md` |
 | Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | integrator, Verifier | none |
 | Handoff package | in the integrator's prompt | EM | integrator | `templates/handoff-package.md` |
@@ -310,9 +310,9 @@ flowchart TD
         SPK[("spikes/")]
     end
 
-    YOU -->|"interview answers (once)"| PF[product-foundations]
+    YOU -->|"interview answers (once)"| PF[apf-product-foundations]
     PF -->|"foundation files + AGENTS.md block"| FND
-    YOU([YOU]) -->|"interview answers"| CP[create-prd]
+    YOU([YOU]) -->|"interview answers"| CP[apf-create-prd]
     FND -->|"vision, constraints, context"| CP
     CTX -->|"research, related PRDs"| CP
     CP -->|"drafts/PRD-NNN.md"| DRAFTS
@@ -396,7 +396,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    YOU([YOU]) -->|"interview answers"| RS[research skill]
+    YOU([YOU]) -->|"interview answers"| RS[apf-research skill]
     FND[("foundations")] -->|"vision, constraints"| RS
     SPK[("spikes/")] -.->|"existing research (avoid duplicates)"| RS
     RS -->|"drafts/RR-NNN.md"| DR[("drafts/")]
@@ -414,7 +414,7 @@ flowchart TD
     RE -->|"spikes/projects/RR-NNN-slug/"| SPK
     DW -.->|"done, I am free"| EM
     RE -.->|"done, I am free"| EM
-    SPK -->|"completed research"| ARCH[architects, create-prd]
+    SPK -->|"completed research"| ARCH[architects, apf-create-prd]
 ```
 
 ---
@@ -464,16 +464,16 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 ## Skills and packaging
 
 - **Vendored (copied into `vendor/`, adapted where noted):** `deep-code`, `group-design`, `action-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
-- **Ours:** `product-foundations`, `agentic-product-function`, `create-prd` and `research`.
+- **Ours:** `apf-product-foundations`, `apf-start`, `apf-create-prd` and `apf-research`.
 - **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin.
 
-Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `create-prd` is a sibling.
+Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `apf-create-prd` is a sibling.
 
 ```
 README.md  logo.jpg  agentic-team.png      repo docs (not part of any skill)
 skills/
-  agentic-product-function/                installed as one skill; the whole folder is copied
-    SKILL.md                               entry point: /agentic-product-function lanes=N researchers=M
+  apf-start/                installed as one skill; the whole folder is copied
+    SKILL.md                               entry point: /apf-start lanes=N researchers=M
     roles/                                 engineering-manager, architect-chief, architect-core,
                                            architect-cloud, architect-solution, support-sop,
                                            developer, tester, integrator, verifier,
@@ -487,13 +487,13 @@ skills/
     vendor/                                deep-code, group-design, action-plan (read by path)
     scripts/watch-dir.py                   kqueue watcher, takes an event tag: PRD, RESEARCH
                                            (poll fallback elsewhere)
-  create-prd/                              installed as its own skill
+  apf-create-prd/                              installed as its own skill
     SKILL.md
     templates/prd.md
   research/                                installed as its own skill
     SKILL.md
     templates/research-request.md
-  product-foundations/                     installed as its own skill; run once first
+  apf-product-foundations/                     installed as its own skill; run once first
     SKILL.md
     templates/                             product-vision, product-guiding-principles, company-context
 ```
@@ -509,9 +509,9 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
-- Install is verified from GitHub and from a local path (both skills found and installed with all supporting folders). The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
+- Install is verified from a local path with the current names (all four skills found and installed with all supporting folders). The GitHub route worked before the rename and needs a retest once pushed. The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
-- `product-foundations` is untested, as are its `AGENTS.md` managed block and the `CLAUDE.md` `@AGENTS.md` import (that Claude Code resolves it, and that subagents see it, is assumed, not verified). Roles also read the foundation files by explicit path, so they do not depend on it.
+- `apf-product-foundations` is untested, as are its `AGENTS.md` managed block and the `CLAUDE.md` `@AGENTS.md` import (that Claude Code resolves it, and that subagents see it, is assumed, not verified). Roles also read the foundation files by explicit path, so they do not depend on it.
 - The research function is untested. It assumes a researcher (a subagent) can spawn its own angle agents; if it cannot, `roles/researcher.md` falls back to doing the angles sequentially itself, which is weaker. Researcher-lane agents are assumed able to message each other (researcher → judge → producer).
 - Naming: you wrote both `spike` and `spikes`; this uses `spikes/` (with `docs/` and `projects/`). Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate. Say if you want either changed.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
