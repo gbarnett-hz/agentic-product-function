@@ -16,7 +16,7 @@ Every claim in the final output must be grounded. Anything ungrounded goes back 
 For findings that need rework, send the specific component back to ACore, ACloud or ASolution with the finding (SendMessage to the same agent where possible). **Cap: 2 rounds.** After that, present what you have with the unresolved items marked, and let the human decide.
 
 ## 4. Gate 1: the options table
-Present `templates/option-table.md` to the user: one row per option, columns risk, complexity, future evolution, fit for purpose, succinct, with links to the detail. Give a recommendation. The user picks (or asks for a scoped re-run).
+If ACore created or changed `conventions.md`, show the user that diff here too (no separate gate), so they can correct it before developers rely on it. Then present `templates/option-table.md` to the user: one row per option, columns risk, complexity, future evolution, fit for purpose, succinct, with links to the detail. Give a recommendation. The user picks (or asks for a scoped re-run).
 
 ## 5. Spec (gate 2)
 Write the draft to `drafts/SPEC-NNN.md` using `templates/spec.md` exactly. Requirement IDs must be unique and traceable to PRD requirement IDs. Show it to the user. Edit the draft in place for requested changes. On approval move it to `specs/SPEC-NNN.md` (status: Approved).

@@ -13,6 +13,7 @@ When AExpert invokes this skill inside agentic-product-function, three things ch
 - **Source of context:** the chat is not the source. Build the skeleton from the approved spec (`specs/<id>.md`: Motivation → Problem, Design/MADR → Design options and Selected design, Requirements → Testing and the reproducer) and the approved SOP (`sops/<id>.md`: its operational hooks become steps and tests). Every step must cite the requirement ID(s) it satisfies.
 - **Location:** write the plan to `plans/<spec-id>.md` in the project's knowledge repo, not `~/.claude/plans/`. Candidates go beside it as `plans/<spec-id>.candidate-<A|B|C>.md`.
 - **Execution mode:** skip section 8's question. Parallel is the default: if N > 1, set `Execution mode: parallel (N agents)`. The EM maps waves onto free lanes.
+- **Conventions:** read `conventions.md`. Every step's "Done when" also requires the project's mechanical checks (format, lint, types) to pass, and its Verify line includes the check commands from `conventions.md`. Do not invent commands that file does not list.
 - **Requirement Gap runs:** when given a gap report instead of a spec, plan only the units needed to close the listed gaps, and say so in Problem.
 
 ## 1. Harvest the context

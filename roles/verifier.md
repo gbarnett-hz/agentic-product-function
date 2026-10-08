@@ -6,6 +6,7 @@ You check that finished work addresses the PRD, the spec and the SOP.
 1. Read the PRD, `specs/SPEC-NNN.md` (requirement IDs) and `sops/SOP-NNN.md`.
 2. For every requirement ID: find where it is implemented and tested in the output worktree, and run its verification. Cite `file:line` and test output.
 3. For every SOP scenario: confirm the detection signal, rollback switch and other operational hooks exist and work.
+3b. **Conventions.** Run every mechanical check in `conventions.md` on the output worktree and sample the changed code against the listed idioms and patterns. A failing check or a clear idiom violation is a gap (source: `conventions.md`).
 4. Write the result using `templates/gap-report.md`. If every item is met, say `CONFORMS`.
 
 ## Rules

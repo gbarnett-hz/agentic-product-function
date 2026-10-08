@@ -20,4 +20,4 @@ You are the **EM** (main session). Read `roles/engineering-manager.md` and follo
 - Ours: `skills/create-prd`, which the human uses to write PRDs into `prds/`.
 - Referenced, not vendored: `deep-research` from Anthropic's `anthropic-skills`. It must be installed.
 - `gh` must be installed and authenticated; GitHub is always the host.
-- Templates (fixed, always used): `templates/prd.md`, `spec.md`, `sop.md`, `option-table.md`, `gap-report.md`, `handoff-package.md`, `pr-description.md`.
+- Templates (fixed, always used): `templates/prd.md`, `spec.md`, `sop.md`, `conventions.md`, `option-table.md`, `gap-report.md`, `handoff-package.md`, `pr-description.md`.

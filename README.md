@@ -48,14 +48,14 @@ It writes `drafts/PRD-001.md` and edits it with you. When you say it is ready, i
 
 ### 3. Architecture runs
 The EM flags the new PRD in one line and hands over to **AExpert** (you now talk to AExpert about architecture). Behind the scenes:
-1. ACore reads your codebase (`deep-code`), then proposes competing designs (`group-design`).
+1. ACore reads your codebase (`deep-code`), writes or refreshes `conventions.md` (your formatters, linters, patterns, and each technology's idiom), then proposes competing designs (`group-design`).
 2. ACloud and ASolution run in parallel on ACore's output (`deep-research`): cloud side effects, and fit in enterprise deployments.
 3. AExpert launches adversarial agents, chosen for this PRD (for example: "what breaks during a rolling upgrade?", "is every claim cited?"). It can send components back to the architects, at most 2 rounds.
 
 You can step away. It takes a while.
 
 ### 4. Gate 1: pick an option
-AExpert shows a short table: one row per option, scored on **risk, complexity, future evolution, fit for purpose**, with links to the detail, plus its recommendation. You can:
+If `conventions.md` is new or changed, AExpert shows it first so you can correct it. Then a short table: one row per option, scored on **risk, complexity, future evolution, fit for purpose**, with links to the detail, plus its recommendation. You can:
 - Pick an option: "Option B".
 - Ask for a scoped re-run: "redo ACloud, assuming multi-region".
 
@@ -74,7 +74,7 @@ AExpert runs `action-plan` on the approved spec and SOP: test-first steps groupe
 
 ### 8. Engineering runs
 The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are busy, units queue. For each unit:
-- A worktree is created; the developer works in it and sends the result to its paired tester.
+- A worktree is created; the developer works in it following `conventions.md`, runs the format, lint and type checks until clean, and sends the result to its paired tester, who re-runs the checks and reviews idiom.
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
 - A wave must be merged before the next wave starts. If a plan is split across lanes, the **integrator** merges the lane worktrees into `prd/PRD-001` and runs the full suite and the reproducer. A plan taken by one lane needs no merge.
 
@@ -126,6 +126,7 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 | PRD draft | `drafts/PRD-NNN.md` | `create-prd` | YOU | `templates/prd.md` |
 | PRD | `prds/PRD-NNN-<slug>.md` | `create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `templates/prd.md` |
 | Knowledge repo context | `research/ product-vision company-vision market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
+| Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `action-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
 | Option table (gate 1) | shown to you | AExpert | YOU | `templates/option-table.md` |
@@ -296,7 +297,9 @@ flowchart TD
 | Plan review | none, it goes straight to the EM |
 | Capacity | lanes only; no idle lane means no dispatch |
 | Parallelism | by default, if the plan permits |
-| Done means | the work addresses the PRD, the spec and the SOP |
+| Idiom and conventions | `conventions.md` authority order: project's enforced config, then surrounding code, then the technology's community idiom (cited) |
+| Convention checks | developer runs format/lint/types before handoff; tester re-runs and reviews idiom; integrator re-runs after each merge; Verifier reports violations as gaps |
+| Done means | the work addresses the PRD, the spec, the SOP and the conventions |
 | Output | one branch and one GitHub PR per PRD |
 
 ---
@@ -328,7 +331,7 @@ SKILL.md              entry point: /agentic-product-function lanes=N
 roles/                engineering-manager, architect-chief, architect-core, architect-cloud,
                       architect-solution, support-sop, developer, tester, integrator, verifier
 flows/                architecture.md, engineering.md, requirement-gap.md
-templates/            prd, spec, sop, option-table, gap-report, handoff-package, pr-description
+templates/            prd, spec, sop, conventions, option-table, gap-report, handoff-package, pr-description
 skills/               deep-code, group-design, action-plan (vendored); create-prd (ours)
 scripts/watch-prds.py kqueue watcher (poll fallback elsewhere)
 ```
@@ -343,4 +346,5 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - Whether subagents can message each other (developer ↔ tester, integrator → lane) as `flows/engineering.md` assumes.
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - `deep-research` must be installed separately.
+- Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
 - `agentic-team.png` is out of date.

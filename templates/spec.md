@@ -34,7 +34,7 @@ External interfaces (APIs, config, wire formats, CLI).
 Performance, availability, security, compatibility, operability, each with a measurable target.
 
 ### 4.3 Constraints
-Imposed design and environment constraints.
+Imposed design and environment constraints. The implementation MUST conform to `conventions.md` (project config, surrounding code, and technology idiom).
 
 ## 5. Design (how)
 Architecture and key mechanisms, with `path/to/file:line` references to the existing code. Include data flow and failure behaviour.

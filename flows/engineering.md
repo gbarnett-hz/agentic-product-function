@@ -9,7 +9,7 @@ Owner: EM. Capacity = number of lanes, fixed at invocation. A lane is a develope
 4. The EM spawns the lane's developer and tester as subagents and gives each the spec, the SOP, the whole plan and its unit.
 
 ## Lane loop
-developer works in the worktree → sends to tester (SendMessage) → tester comments → developer addresses → … **cap 3 rounds**, then escalate to the EM (then the human). When the tester is satisfied it declares the unit complete and tells the EM: "I am done, I am now free." The EM marks the lane idle and dispatches the next queued unit.
+developer works in the worktree, following `conventions.md` and running its mechanical checks (format, lint, types, tests) until clean → sends to tester (SendMessage), who re-runs the checks and reviews idiom → tester comments → developer addresses → … **cap 3 rounds**, then escalate to the EM (then the human). When the tester is satisfied it declares the unit complete and tells the EM: "I am done, I am now free." The EM marks the lane idle and dispatches the next queued unit.
 
 A crashed or stalled lane: the EM reassigns its unit to another idle lane.
 
