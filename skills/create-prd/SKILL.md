@@ -11,7 +11,7 @@ Template: `templates/prd.md` in this skill's directory. Use it exactly; do not a
 
 ## 1. Orient
 - `prds/` existing files: the next ID is the highest `PRD-NNN` + 1 (start at `PRD-001`). Create `prds/` and `drafts/` if missing.
-- Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` if present (created by `/product-foundations`; if absent, suggest running it first, but do not block). Skim `research/`, `market-analysis` and related PRDs. Ask only what they do not answer.
+- Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` if present (created by `/product-foundations`; if absent, suggest running it first, but do not block). Skim `spikes/` (completed research: `docs/` and `projects/`), `market-analysis` and related PRDs; if the PRD needs research that does not exist yet, suggest `/research` first. Ask only what they do not answer.
 - Keep the PRD consistent with them. If a requirement the user wants conflicts with the vision or a hard constraint (HC-n), say so and let the user decide; record the conflict under Risks and open questions.
 - If the user brought notes, a ticket or a rough idea, start from that.
 

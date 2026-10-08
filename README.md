@@ -2,7 +2,7 @@
 
 # agentic-product-function
 
-A skill that models a product function as a team of agents. You write a PRD. An architect team assesses it, you approve an option, a spec and an SOP at three gates, and a fixed pool of developer+tester lanes builds it in git worktrees, verifies it against the PRD, spec and SOP, and opens a GitHub PR with `gh`.
+A skill that models a product function as a team of agents. You write a PRD. An architect team assesses it, you approve an option, a spec and an SOP at three gates, and a fixed pool of developer+tester lanes builds it in git worktrees, verifies it against the PRD, spec and SOP, and opens a GitHub PR with `gh`. A second team of researchers takes research requests from `research/` and closes each with a spike (a document or a small project) in `spikes/`.
 
 See `agentic-team.png` for the original diagram (out of date: lanes are dev+test pairs, and the integrator and verifier are missing).
 
@@ -25,7 +25,7 @@ See `agentic-team.png` for the original diagram (out of date: lanes are dev+test
 
 ## Install
 
-Three skills ship in this repo: `product-foundations` (one-time setup of your vision, principles and company context), `agentic-product-function` (the team) and `create-prd` (how you write PRDs). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
+Four skills ship in this repo: `product-foundations` (one-time setup of your vision, principles and company context), `agentic-product-function` (the team) `create-prd` (how you write PRDs) and `research` (how you request research). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
 
 **Prerequisites:** Node.js (for `npx`), a git repository with a GitHub remote, `gh` authenticated, `python3`, and Anthropic's `anthropic-skills` plugin (the CLI cannot install it; it provides `deep-research`).
 
@@ -33,13 +33,13 @@ Three skills ship in this repo: `product-foundations` (one-time setup of your vi
 ```bash
 npx skills add gbarnett-hz/agentic-product-function --list
 ```
-You should see three skills: `product-foundations`, `agentic-product-function` and `create-prd`.
+You should see four skills: `product-foundations`, `agentic-product-function`, `create-prd` and `research`.
 
 ### 2. Install into your project
 ```bash
 cd your-project
 npx skills add gbarnett-hz/agentic-product-function \
-  --skill product-foundations --skill agentic-product-function --skill create-prd -a claude-code
+  --skill product-foundations --skill agentic-product-function --skill create-prd --skill research -a claude-code
 ```
 - Installs to `./.claude/skills/` (project scope). Commit that folder if you want your team to share it.
 - Add `-g` to install to `~/.claude/skills/` instead, for every project on your machine.
@@ -49,17 +49,17 @@ npx skills add gbarnett-hz/agentic-product-function \
 - The full URL also works: `npx skills add https://github.com/gbarnett-hz/agentic-product-function`.
 
 ### 3. Start a new Claude Code session
-Skills load at session start. Then follow the [tutorial](#tutorial): `/product-foundations` once, then `/agentic-product-function lanes=3`, then `/create-prd`.
+Skills load at session start. Then follow the [tutorial](#tutorial): `/product-foundations` once, then `/agentic-product-function lanes=3 researchers=2`, then `/create-prd` or `/research`.
 
 ### Update and remove
 ```bash
 npx skills update                      # update installed skills (add -g for global only)
-npx skills remove product-foundations agentic-product-function create-prd
+npx skills remove product-foundations agentic-product-function create-prd research
 ```
 
 ### Notes
 - `deep-code`, `group-design` and `action-plan` are bundled inside `agentic-product-function/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
-- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill product-foundations --skill agentic-product-function --skill create-prd -a claude-code`.
+- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill product-foundations --skill agentic-product-function --skill create-prd --skill research -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
 - Verified: `--list` and a non-interactive install from `gbarnett-hz/agentic-product-function` on GitHub put the two skills that existed at the time (`agentic-product-function`, `create-prd`) in `./.claude/skills/`; `product-foundations` was added afterwards and is not yet install-tested (as copies, because the run was non-interactive). The installed skills have not been run (see [Known gaps](#known-gaps)).
 
@@ -93,11 +93,11 @@ From here on the team uses them: architects rule out or flag options that violat
 
 ### 2. Start the team (do this first)
 ```
-/agentic-product-function lanes=3
+/agentic-product-function lanes=3 researchers=2
 ```
-This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` if missing, writes `.agentic-team/state.json` with 3 idle lanes, and arms the PRD watcher. 3 lanes means 3 developers, each paired with a tester. Capacity is fixed for the session.
+This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` (and, when researchers ≥ 1, `research/ spikes/docs/ spikes/projects/`) if missing, writes `.agentic-team/state.json` with 3 idle engineering lanes and 2 idle researcher lanes, and arms the watchers for `prds/` and `research/`. 3 lanes means 3 developers, each paired with a tester. 2 researchers means 2 researcher lanes, each with its own researcher, judge, doc writer and research engineer. Capacity is fixed for the session; `researchers=0` turns research off.
 
-Start the EM *before* writing the PRD. The watcher treats any PRD that already exists when it first starts as already seen.
+Start the EM *before* writing the PRD. The watchers treat any PRD or research request that already exists when they first start as already seen.
 
 ### 3. Write the PRD
 ```
@@ -152,12 +152,26 @@ The **Verifier** checks the output against every requirement ID and SOP scenario
 ### 11. Next PRD
 Just run `/create-prd` again. PRDs run through architecture one at a time (the main session is busy with you), while lanes keep building earlier plans in the background.
 
+### 12. Run a spike (research)
+```
+/research
+```
+The skill interviews you and writes a research request in the fixed template: objective, specific research questions (`Q-1`...), context, scope, sources to consult, depth (`quick` / `standard` / `deep`), exit criteria, deliverable (`document`, `project` or `judge decides`) and constraints. When you approve, it writes `research/RR-001-<slug>.md`, which the EM picks up.
+
+An idle researcher lane takes the whole request. Its **researcher** investigates with several angle agents in parallel (repo, web, papers, standards, prior art, and always adversarial ones that try to disprove the leading conclusions), then hands the findings to the lane's **research judge**. The judge checks them against your exit criteria (sending gaps back, at most 2 rounds), decides the artifact type, and routes to exactly one producer:
+- a **research doc writer** writes `spikes/docs/RR-001-<slug>.md`, or
+- a **research engineer** builds and runs `spikes/projects/RR-001-<slug>/`.
+
+The EM tells you the artifact path when the lane is free again. There is no human gate: read the spike and decide. Architects and `/create-prd` read `spikes/` as context for later work. Spikes are left uncommitted in your working tree.
+
 ### Troubleshooting
 | Symptom | Cause / fix |
 |---|---|
 | `/agentic-product-function` stops and asks for foundations | The three files are missing from the project root. Run `/product-foundations`. |
 | Wrote a PRD, nothing happened | EM was not running. Start it, then move the PRD out of `prds/` and back in. |
 | Edited a PRD and nothing happened | Edits to a seen PRD are ignored. Drop the revision in as a new file (new ID). |
+| Wrote a research request, nothing happened | The EM was not running with `researchers` ≥ 1. Start it, then move the request out of `research/` and back in. |
+| Research requests queue | All researcher lanes are busy; they start when a lane reports free. Check `state.json`. |
 | Units not starting | All lanes busy; units queue until a lane reports free. Check `state.json`. |
 | Architecture stalls on `deep-research` | Make sure `anthropic-skills` is installed. |
 | PR step fails | `gh auth status`; confirm the repo has a GitHub remote. |
@@ -178,6 +192,11 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 | **Lane** (developer-i + test-i) | A developer paired with a tester. N lanes, set at invocation. Each unit of work is isolated in a git worktree. |
 | **Integrator** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
 | **Verifier** | Checks finished work against the PRD, spec requirement IDs and SOP. Produces a gap report. |
+| **Researcher lane** (researcher + research-judge + research-doc-writer + research-engineer) | M lanes, set at invocation (`researchers=M`). A lane takes one research request in its entirety. |
+| **researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `deep-code`): repo, web, papers, standards, prior art. Writes findings. |
+| **research-judge** | Checks the findings against the exit criteria (gaps go back to the researcher, cap 2), decides the artifact type (`document` or `project`) and routes to one producer. |
+| **research-doc-writer** | Writes the spike document to `spikes/docs/`. |
+| **research-engineer** | Builds and runs the spike project in `spikes/projects/`. |
 
 ---
 
@@ -191,7 +210,7 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 | Guiding principles | `product-guiding-principles.md` (HC-n hard constraints, P-n principles) | `product-foundations` | create-prd, AExpert, architects, SS, developers, testers, Verifier | `product-foundations/templates/product-guiding-principles.md` |
 | Company context | `company-context.md` | `product-foundations` | create-prd, AExpert, ACloud, ASolution, SS | `product-foundations/templates/company-context.md` |
 | Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `product-foundations` | every agent in the project | none |
-| Other knowledge-repo context | `research/ market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
+| Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | create-prd, AExpert, architects | none |
 | Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `action-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
@@ -201,7 +220,12 @@ Just run `/create-prd` again. PRDs run through architecture one at a time (the m
 | SOP draft | `drafts/SOP-NNN.md` | SS | YOU, AExpert | `templates/sop.md` |
 | SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `action-plan`, lanes, integrator, Verifier | `templates/sop.md` |
 | Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `action-plan` | EM, lanes, integrator | `vendor/action-plan` |
-| Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt` | EM only | EM | `roles/engineering-manager.md` |
+| Research request draft | `drafts/RR-NNN.md` | `research` | YOU | `research/templates/research-request.md` |
+| Research request | `research/RR-NNN-<slug>.md` | `research` (on your go-ahead) | watcher → EM, researcher, research-judge | `research/templates/research-request.md` |
+| Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, research-judge | research-judge, doc writer, engineer | none |
+| Spike document | `spikes/docs/RR-NNN-<slug>.md` | research-doc-writer | YOU, architects, `create-prd`, `research` | `templates/spike-document.md` |
+| Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | research-engineer | YOU, architects, `create-prd`, `research` | `templates/spike-project-readme.md` |
+| Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt`, `.agentic-team/seen-research.txt` | EM only | EM | `roles/engineering-manager.md` |
 | Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | integrator, Verifier | none |
 | Handoff package | in the integrator's prompt | EM | integrator | `templates/handoff-package.md` |
 | Integration branch | `prd/PRD-NNN` | integrator | Verifier, EM | git |
@@ -252,6 +276,19 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 5. The EM dispatches to idle lanes, merges, and the Verifier checks again.
 6. Cap: 2 gap cycles, then escalate to you.
 
+### Research (owner: EM)
+
+A researcher lane is four role agents: researcher, research-judge, research-doc-writer and research-engineer. `researchers=M` gives M lanes. One request occupies one lane from start to finish; it is never split across lanes.
+
+1. The EM's second watcher prints `NEW_RESEARCH <path>`; the EM queues the request.
+2. The EM assigns it to an **idle** researcher lane only; no idle lane means it queues. Researcher capacity is separate from the engineering lanes.
+3. **researcher:** runs parallel angle agents (repo, history, tests, web, papers, standards, prior art, empirical evidence) plus adversarial angles (counter-evidence, source quality and bias, and at `deep` an independent re-derivation). Reconciles into `findings.md` with an answer, confidence and citations per question, counter-evidence, limitations and an exit-criteria check.
+4. **research-judge:** checks the findings against the exit criteria (gaps back to the researcher, **cap 2 rounds**), then decides `document` or `project` (a project when closing the request needs executable evidence such as a benchmark, proof of concept or reproduction), writes `judgement.md` and routes to exactly one producer.
+5. **research-doc-writer** writes `spikes/docs/RR-NNN-<slug>.md`, or **research-engineer** builds and runs `spikes/projects/RR-NNN-<slug>/` and records observed results in its README.
+6. The producer tells the EM "RR-NNN done, I am now free"; the EM frees the lane, tells you the artifact path and dispatches the next queued request.
+
+No human gate: ambiguity is recorded as an assumption and listed in the spike. Spikes recommend; you decide.
+
 ---
 
 ## Data-flow DAGs
@@ -270,6 +307,7 @@ flowchart TD
         SPECS[("specs/")]
         SOPS[("sops/")]
         PLANS[("plans/")]
+        SPK[("spikes/")]
     end
 
     YOU -->|"interview answers (once)"| PF[product-foundations]
@@ -316,6 +354,8 @@ flowchart TD
     VER -->|"CONFORMS"| EM
     EM -->|"gh pr create: pr-description.md"| PR([GitHub PR])
     PR -->|"review, merge"| YOU
+    SPK -->|"completed research"| AE
+    SPK -->|"completed research"| CP
     FND -->|"vision, HC-n, P-n, context"| AE
     FND -->|"HC-n, P-n"| LANES
     FND -->|"HC-n checks"| VER
@@ -352,6 +392,31 @@ flowchart TD
     EM -->|"next wave branches from prd/PRD-NNN"| EM
 ```
 
+### Research
+
+```mermaid
+flowchart TD
+    YOU([YOU]) -->|"interview answers"| RS[research skill]
+    FND[("foundations")] -->|"vision, constraints"| RS
+    SPK[("spikes/")] -.->|"existing research (avoid duplicates)"| RS
+    RS -->|"drafts/RR-NNN.md"| DR[("drafts/")]
+    DR -.->|"review, edits"| YOU
+    RS -->|"research/RR-NNN-slug.md on go-ahead"| RQ[("research/")]
+    RQ -->|"NEW_RESEARCH event (watcher)"| EM
+    EM <-->|"researcher lane states, queue"| STATE[(".agentic-team/state.json")]
+    EM -->|"request path, only if a researcher lane is idle"| RES[researcher]
+    SRC[("repo, web, papers, standards, spikes/, foundations")] -->|"sources"| RES
+    RES -->|"findings.md: answers, citations, counter-evidence"| J[research-judge]
+    J -.->|"gaps, cap 2 rounds"| RES
+    J -->|"judgement.md: document"| DW[research-doc-writer]
+    J -->|"judgement.md: project"| RE[research-engineer]
+    DW -->|"spikes/docs/RR-NNN-slug.md"| SPK
+    RE -->|"spikes/projects/RR-NNN-slug/"| SPK
+    DW -.->|"done, I am free"| EM
+    RE -.->|"done, I am free"| EM
+    SPK -->|"completed research"| ARCH[architects, create-prd]
+```
+
 ---
 
 ## Rules and caps
@@ -369,11 +434,14 @@ flowchart TD
 | Gate to the EM | spec approved AND SOP approved |
 | Plan review | none, it goes straight to the EM |
 | Capacity | lanes only; no idle lane means no dispatch |
+| Researcher capacity | `researchers=M` lanes, separate from engineering lanes; one request per lane, never split; no idle lane means it queues |
+| Judge ↔ researcher loop | 2 rounds, then proceed with the gaps marked in the spike |
+| Research human gate | none; assumptions and gaps are recorded in the spike |
 | Parallelism | by default, if the plan permits |
 | Idiom and conventions | `conventions.md` authority order: project's enforced config, then surrounding code, then the technology's community idiom (cited) |
 | Convention checks | developer runs format/lint/types before handoff; tester re-runs and reviews idiom; integrator re-runs after each merge; Verifier reports violations as gaps |
 | Done means | the work addresses the PRD, the spec, the SOP and the conventions |
-| Output | one branch and one GitHub PR per PRD |
+| Output | one branch and one GitHub PR per PRD; one spike per research request (`spikes/docs/` or `spikes/projects/`) |
 
 ---
 
@@ -385,6 +453,8 @@ Decided once and used always.
 |---|---|---|
 | PRD | No single standard; the sections common across Atlassian, Product School and others (problem, goals/non-goals, users, requirements with acceptance criteria, metrics, constraints, open questions). PRD requirements get IDs (`PR-n`). | `templates/prd.md` |
 | Spec | IEEE 29148-style verifiable, ID'd requirements ("what", `R-n`) kept separate from the design ("how", RFC/design-doc style), with a MADR 4.0 decision record. | `templates/spec.md` |
+| Research request | Agile spike (question, exit criteria, deliverable) combined with a research brief (objective, context, scope, method, follow-ups). The spike's time-box becomes a depth level (quick / standard / deep) because agents do not work in days. Questions get IDs (`Q-n`). | `research/templates/research-request.md` |
+| Spike (output) | Research report, answer first: summary and recommendation, answers per question with confidence, method, findings, counter-evidence, exit criteria, limitations, follow-ups, references. A project's README follows the same shape. | `templates/spike-document.md`, `templates/spike-project-readme.md` |
 | SOP | Incident-runbook structure: severity, detection, immediate response, investigation, mitigation, rollback, communication, escalation, post-incident. | `templates/sop.md` |
 
 Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources. The SOP structure comes from third-party runbook templates, not the Google SRE book or PagerDuty docs directly (those did not come up in search).
@@ -394,7 +464,7 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 ## Skills and packaging
 
 - **Vendored (copied into `vendor/`, adapted where noted):** `deep-code`, `group-design`, `action-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
-- **Ours:** `product-foundations`, `agentic-product-function` and `create-prd`.
+- **Ours:** `product-foundations`, `agentic-product-function`, `create-prd` and `research`.
 - **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin.
 
 Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `create-prd` is a sibling.
@@ -403,18 +473,26 @@ Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md
 README.md  logo.jpg  agentic-team.png      repo docs (not part of any skill)
 skills/
   agentic-product-function/                installed as one skill; the whole folder is copied
-    SKILL.md                               entry point: /agentic-product-function lanes=N
+    SKILL.md                               entry point: /agentic-product-function lanes=N researchers=M
     roles/                                 engineering-manager, architect-chief, architect-core,
                                            architect-cloud, architect-solution, support-sop,
-                                           developer, tester, integrator, verifier
-    flows/                                 architecture.md, engineering.md, requirement-gap.md
+                                           developer, tester, integrator, verifier,
+                                           researcher, research-judge, research-doc-writer,
+                                           research-engineer
+    flows/                                 architecture.md, engineering.md, requirement-gap.md,
+                                           research.md
     templates/                             spec, sop, conventions, option-table, gap-report,
-                                           handoff-package, pr-description
+                                           handoff-package, pr-description, spike-document,
+                                           spike-project-readme
     vendor/                                deep-code, group-design, action-plan (read by path)
-    scripts/watch-prds.py                  kqueue watcher (poll fallback elsewhere)
+    scripts/watch-dir.py                   kqueue watcher, takes an event tag: PRD, RESEARCH
+                                           (poll fallback elsewhere)
   create-prd/                              installed as its own skill
     SKILL.md
     templates/prd.md
+  research/                                installed as its own skill
+    SKILL.md
+    templates/research-request.md
   product-foundations/                     installed as its own skill; run once first
     SKILL.md
     templates/                             product-vision, product-guiding-principles, company-context
@@ -434,5 +512,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - Install is verified from GitHub and from a local path (both skills found and installed with all supporting folders). The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
 - `product-foundations` is untested, as are its `AGENTS.md` managed block and the `CLAUDE.md` `@AGENTS.md` import (that Claude Code resolves it, and that subagents see it, is assumed, not verified). Roles also read the foundation files by explicit path, so they do not depend on it.
+- The research function is untested. It assumes a researcher (a subagent) can spawn its own angle agents; if it cannot, `roles/researcher.md` falls back to doing the angles sequentially itself, which is weaker. Researcher-lane agents are assumed able to message each other (researcher → judge → producer).
+- Naming: you wrote both `spike` and `spikes`; this uses `spikes/` (with `docs/` and `projects/`). Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate. Say if you want either changed.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
 - `agentic-team.png` is out of date.

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""usage: watch_prds.py <watch-root> <seen-file>
+"""usage: watch-dir.py <watch-root> <seen-file> [TAG]
 
-Event-driven prd watcher. Prints `NEW_PRD <path>` once per new *.md under <watch-root>
+Event-driven directory watcher. Prints `NEW_<TAG> <path>` (TAG defaults to PRD; the EM also uses RESEARCH) once per new *.md under <watch-root>
 (recursively) and records it in <seen-file> so a restart never re-reports it. On first
-start (no <seen-file>) every existing prd is marked seen, not reported. Never exits:
+start (no <seen-file>) every existing file is marked seen, not reported. Never exits:
 run it under Monitor so each line is a notification. Uses kqueue (macOS/BSD) and wakes
 only on directory changes. Elsewhere it falls back to a 2s poll.
 """
@@ -11,20 +11,21 @@ import os, select, sys, time
 
 SETTLE = 2.0  # a file is reported once unmodified this long (lets writers finish)
 root, seen_path = os.path.abspath(sys.argv[1]), sys.argv[2]
+tag = (sys.argv[3] if len(sys.argv) > 3 else "PRD").upper()
 seen = set(open(seen_path).read().split("\n")) if os.path.exists(seen_path) else set()
 
 def scan():
-    dirs, prds = [], []
+    dirs, found = [], []
     for d, sub, files in os.walk(root):
         sub[:] = [s for s in sub if s not in (".git", ".claude")]
         dirs.append(d)
-        prds += [os.path.join(d, f) for f in files if f.endswith(".md")]
-    return dirs, prds
+        found += [os.path.join(d, f) for f in files if f.endswith(".md")]
+    return dirs, found
 
-def report(prds):
-    """Emit settled unseen prds; return True if some are still being written."""
+def report(found):
+    """Emit settled unseen files; return True if some are still being written."""
     pending, now = False, time.time()
-    for p in sorted(prds):
+    for p in sorted(found):
         if p in seen:
             continue
         try:
@@ -36,7 +37,7 @@ def report(prds):
         seen.add(p)
         with open(seen_path, "a") as f:
             f.write(p + "\n")
-        print("NEW_PRD " + p, flush=True)
+        print(f"NEW_{tag} {p}", flush=True)
     return pending
 
 if not os.path.exists(seen_path):  # first start: what's already there isn't new work
@@ -49,7 +50,7 @@ if not hasattr(select, "kqueue"):
 
 kq, fds = select.kqueue(), {}
 while True:
-    dirs, prds = scan()
+    dirs, found = scan()
     for d in dirs:
         if d not in fds:
             try:
@@ -60,5 +61,5 @@ while True:
                                       select.KQ_NOTE_WRITE | select.KQ_NOTE_DELETE | select.KQ_NOTE_RENAME)], 0)
     for d in [d for d in fds if d not in dirs]:
         os.close(fds.pop(d))
-    pending = report(prds)
+    pending = report(found)
     kq.control(None, 8, SETTLE if pending else None)  # blocks until a watched dir changes
