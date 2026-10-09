@@ -10,7 +10,7 @@ Precondition (gate 0): `flows/prd-gap.md` reported `No open gaps.` for the curre
 |---|---|---|---|---|
 | 1 | EM | `prds/PRD-NNN.md` | handover | AExpert |
 | 2 | ACore | PRD, repo | understanding + candidate options (apf-deep-code → apf-group-design) | ACloud, ASolution, AExpert |
-| 3 | ACloud, ASolution (parallel) | ACore output | cloud impact, enterprise fit (deep-research) | AExpert |
+| 3 | ACloud, ASolution (parallel) | ACore output | cloud impact, enterprise fit (apf-deep-research) | AExpert |
 | 4 | AExpert + adversarial agents | all outputs | findings; redo requests (cap 2 rounds) | architects or gate 1 |
 | 5 | **Gate 1** (human) | `templates/option-table.md` | chosen option | AExpert |
 | 6 | AExpert | chosen option | `drafts/SPEC-NNN.md` | gate 2 |

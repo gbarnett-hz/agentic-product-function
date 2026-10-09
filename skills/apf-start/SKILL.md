@@ -23,10 +23,9 @@ You are the **EM** (main session). Read `roles/engineering-manager.md` and follo
 Every subagent you spawn gets a `description` that starts with its label in brackets, then the PRD or request and the unit, so the agent list shows who is doing what: `[PRDGap] PRD-001 analysis`, `[ACore] PRD-001 design`, `[Developer-2] PRD-001 unit 3`, `[Tester-2] PRD-001 unit 3`, `[WaveMerger] PRD-001 wave 1`, `[Verifier] PRD-001 verify`, `[SOP] PRD-001 SOP`, `[Researcher-1] RR-004 angle: pricing`, `[ResearchJudge] RR-004 the ResearchJudge`. Labels: `PRDGap`, `AExpert`, `ACore`, `ACloud`, `ASolution`, `SOP`, `Developer-<lane>`, `Tester-<lane>`, `WaveMerger` (WaveMerger), `Verifier`, `Researcher-<lane>`, `ResearchJudge`, `ResearchDocWriter`, `ResearchEngineer`. The EM and AExpert are the main session. Where an agent can be given a name to message it by, use the same label.
 
 ## Dependencies
-- Vendored in `vendor/` (read by path, not installed as separate skills): `apf-deep-code`, `apf-group-design`, `apf-plan` (adapted).
+- Vendored in `vendor/` (read by path, not installed as separate skills): `apf-deep-code`, `apf-group-design`, `apf-deep-research`, `apf-plan` (adapted).
 - Companion skill `apf-product-foundations` (installed separately, sibling): run once first; creates the three foundation files and references them from `AGENTS.md`.
 - Companion skill `apf-research` (installed separately, sibling): the human uses it to write research requests into `research/` with the request template.
 - Companion skill `apf-create-prd` (installed separately, sibling of this skill): the human uses it to write PRDs into `prds/` with the PRD template. It runs PRDGap from this skill (`roles/prd-gap.md`, `flows/prd-gap.md`, `templates/prd-gap-report.md`).
-- Referenced, not vendored: `deep-research` from Anthropic's `anthropic-skills`. It must be installed.
 - `gh` must be installed and authenticated; GitHub is always the host.
 - Templates (fixed, always used): `spec.md`, `sop.md`, `conventions.md`, `option-table.md`, `gap-report.md`, `prd-gap-report.md`, `handoff-package.md`, `pr-description.md`, `spike-document.md`, `spike-project-readme.md`. The research-request template lives in the `apf-research` skill.

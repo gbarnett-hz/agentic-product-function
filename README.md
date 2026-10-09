@@ -82,7 +82,7 @@ Organisation (grouping only, no flows; the flows are below):
 
 Four skills ship in this repo: `apf-product-foundations` (one-time setup of your vision, principles and company context), `apf-start` (the team), `apf-create-prd` (how you write PRDs) and `apf-research` (how you request research). Install them with the [skills CLI](https://github.com/vercel-labs/skills) (skills.sh). The repo is public, so no authentication is needed.
 
-**Prerequisites:** Node.js (for `npx`), a git repository with a GitHub remote, `gh` authenticated, `python3`, and Anthropic's `anthropic-skills` plugin (the CLI cannot install it; it provides `deep-research`).
+**Prerequisites:** Node.js (for `npx`), a git repository with a GitHub remote, `gh` authenticated, and `python3`.
 
 ### 1. Preview what the repo offers (optional)
 ```bash
@@ -106,7 +106,7 @@ npx skills update
 ```
 
 ### Notes
-- `apf-deep-code`, `apf-group-design` and `apf-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
+- `apf-deep-code`, `apf-group-design`, `apf-deep-research` and `apf-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
 - Skills run with full agent permissions. Review them before use.
 - Verified: `--list` and a non-interactive install of all four `apf-` skills from `gbarnett-hz/agentic-product-function` on GitHub put them in `./.claude/skills/` as copies, with their supporting folders (also verified from a local checkout).
 
@@ -119,7 +119,7 @@ Worked example: you want rate limiting on a service's public API.
 ### 0. Prerequisites
 - A git repository containing the codebase the feature changes (ACore reads it). Run Claude Code from its root.
 - `gh` installed and authenticated (`gh auth status`). GitHub is always the host.
-- The skills installed (see [Install](#install)), including Anthropic's `anthropic-skills` plugin (provides `deep-research`).
+- The skills installed (see [Install](#install)).
 - `python3` (for the PRD watcher).
 - Your project's foundations written (step 1). `/apf-start` stops if they are missing.
 
@@ -159,7 +159,7 @@ When you say it is ready (and the last round is clean), it writes `prds/PRD-001-
 ### 4. Architecture runs
 The EM flags the new PRD in one line and hands over to **AExpert** (you now talk to AExpert about architecture). Behind the scenes:
 1. ACore reads your codebase (`apf-deep-code`), writes or refreshes `conventions.md` (your formatters, linters, patterns, and each technology's idiom), then proposes competing designs (`apf-group-design`).
-2. ACloud and ASolution run in parallel on ACore's output (`deep-research`): cloud side effects, and fit in enterprise deployments.
+2. ACloud and ASolution run in parallel on ACore's output (`apf-deep-research`: your knowledge repo first, then the web): cloud side effects, and fit in enterprise deployments.
 3. AExpert launches adversarial agents, chosen for this PRD (for example: "what breaks during a rolling upgrade?", "is every claim cited?"). It can send components back to the architects, at most 2 rounds.
 
 You can step away. It takes a while.
@@ -243,7 +243,6 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Wrote a research request, nothing happened | The EM was not running with `researchers` ≥ 1. Start it, then move the request out of `research/` and back in. |
 | Research requests queue | All researcher lanes are busy; they start when a lane reports free. Check `state.json`. |
 | Units not starting | All lanes busy; units queue until a lane reports free. Check `state.json`. |
-| Architecture stalls on `deep-research` | Make sure `anthropic-skills` is installed. |
 | PR step fails | `gh auth status`; confirm the repo has a GitHub remote. |
 
 ---
@@ -257,14 +256,14 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `apf-plan`. A role the main session plays after the EM hands over. |
 | **PRDGap** (prd-gap) | Finds what the PRD leaves unsaid (ambiguity, untestable requirements, conflicts, hidden dependencies, operational needs) from foundations, earlier PRDs, specs, research, code, git and web. Proposes a cited answer per gap. Runs after every PRD modification, so the flow after gates 2 and 3 needs no questions. |
 | **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the PRD, then `apf-group-design` to formulate candidate designs. |
-| **ACloud** (architect-cloud) | ACore's output + `deep-research`: side effects on cloud deployment. |
-| **ASolution** (architect-solution) | ACore's output + `deep-research`: the PRD in enterprise deployments with existing services. |
+| **ACloud** (architect-cloud) | ACore's output + `apf-deep-research`: side effects on cloud deployment. |
+| **ASolution** (architect-solution) | ACore's output + `apf-deep-research`: the PRD in enterprise deployments with existing services. |
 | **SOP** (support-sop) | Builds the SOP from the approved spec. |
 | **Lane** (Developer-i + Tester-i) | A developer paired with a tester. N lanes, set at invocation. Each unit of work is isolated in a git worktree. |
 | **WaveMerger** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
 | **Verifier** | Checks finished work against the PRD, spec requirement IDs and SOP. Produces a gap report. |
 | **Researcher lane** (Researcher + ResearchJudge + ResearchDocWriter + ResearchEngineer) | M lanes, set at invocation (`researchers=M`). Each lane has its own Researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer (1:1, like Developer:Tester), so there is no shared producer pool. A lane takes one research request in its entirety. |
-| **Researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `apf-deep-code`): repo, web, papers, standards, prior art. Writes findings. |
+| **Researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (`apf-deep-research`; `apf-deep-code` for code angles): knowledge repo first, then web, papers, standards, prior art. Writes findings. |
 | **ResearchJudge** | Checks the findings against the exit criteria (gaps go back to the researcher, cap 2), decides the artifact type (`document` or `project`) and routes to one producer. |
 | **ResearchDocWriter** | Writes the spike document to `spikes/docs/`. |
 | **ResearchEngineer** | Builds and runs the spike project in `spikes/projects/`. |
@@ -416,8 +415,8 @@ flowchart TD
     CTX -->|"code, history"| AC
     AC -->|"understanding (apf-deep-code)"| ACL[ACloud]
     AC -->|"understanding (apf-deep-code)"| AS[ASolution]
-    CTX -->|"web, papers (deep-research)"| ACL
-    CTX -->|"web, papers (deep-research)"| AS
+    CTX -->|"web, papers (apf-deep-research)"| ACL
+    CTX -->|"web, papers (apf-deep-research)"| AS
     AC -->|"understanding + candidate options (apf-group-design)"| AE
     ACL -->|"cloud impact per option"| AE
     AS -->|"enterprise fit per option"| AE
@@ -561,9 +560,8 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 
 ## Skills and packaging
 
-- **Vendored (copied into `vendor/`, adapted where noted):** `apf-deep-code`, `apf-group-design`, `apf-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
+- **Vendored (copied into `vendor/`, adapted where noted):** `apf-deep-code`, `apf-group-design`, `apf-deep-research` (our own: knowledge repo first, then the web, parallel angle agents including adversarial ones, a cited answer-first report; used by ACloud, ASolution and the Researcher), `apf-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
 - **Ours:** `apf-product-foundations`, `apf-start`, `apf-create-prd` and `apf-research`.
-- **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin.
 
 Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `apf-create-prd` is a sibling.
 
@@ -582,7 +580,8 @@ skills/
     templates/                             spec, sop, conventions, option-table, gap-report,
                                            handoff-package, pr-description, spike-document,
                                            spike-project-readme, prd-gap-report
-    vendor/                                apf-deep-code, apf-group-design, apf-plan (read by path)
+    vendor/                                apf-deep-code, apf-group-design, apf-deep-research,
+                                           apf-plan (read by path)
     scripts/watch-dir.py                   watcher, takes an event tag (PRD, RESEARCH); with `edits`
                                            it also reports MOD_<TAG> (kqueue, or 2s poll)
     scripts/render-status.py               state.json -> .agentic-team/status.md dashboard
@@ -605,7 +604,6 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - PRD edit detection (`MOD_PRD`) polls every 2 seconds on every platform, because an in-place edit does not wake kqueue. Simultaneous edits by you and the EM within the settle window coalesce into one event; the EM's own re-run catches any change it did not make.
-- `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
 - Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.

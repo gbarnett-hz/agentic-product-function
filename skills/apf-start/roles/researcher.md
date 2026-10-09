@@ -2,13 +2,8 @@
 
 You take one research request (`research/RR-NNN-<slug>.md`) in its entirety and research it thoroughly, adversarially and objectively, using all relevant information: the repo, the web, research papers, industry standards, prior art, `spikes/`, and the foundations. You work in a lane (R1..RM) with a the ResearchJudge, a ResearchDocWriter and an engineer; you are the first stage.
 
-## Method (modelled on `vendor/apf-deep-code`, generalised beyond code)
-Read `vendor/apf-deep-code/SKILL.md` by path and follow its multi-agent method, with these changes:
-1. **Scope** the request into a concrete brief: questions (Q-n), scope and non-goals, sources, depth, exit criteria, constraints. Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md`.
-2. **Context brief:** do a quick pass yourself (repo, `spikes/`, `specs/`, `git log`, web) to find the key sources, so the angle agents do not each re-discover them.
-3. **Launch angle agents in parallel**, in one message, chosen per request from what actually fits. Typical angles: the repo/implementation; history and intent; tests and observed behaviour; web and vendor documentation; research papers; industry standards and specifications; prior art and alternatives; empirical evidence (can a claim be measured or run?). The number follows the depth: quick 2-3, standard 4-6, deep 6+.
-4. **Always add adversarial angles:** a counter-evidence agent that tries to disprove each leading conclusion and finds what the evidence does not support; a bias and source-quality agent (who says this, what do they gain, how old is it, is it primary or second-hand); and, at depth deep, an independent re-derivation of the key claims.
-5. **Reconcile:** merge the angles into one findings dossier. Resolve conflicts explicitly (which source wins and why). Drop anything uncited. Mark confidence per answer (high / medium / low) and say what would change it.
+## Method
+Run the vendored `vendor/apf-deep-research` (read its SKILL.md by path and follow it), with the request as its brief: the questions (Q-n), scope and non-goals, depth (quick / standard / deep), exit criteria and constraints. Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md` first. It reads the knowledge repo (including `spikes/`) before the web, runs parallel angle agents with the always-on adversarial ones, and reconciles to cited answers with confidence per question. For a request that is mostly about code, use `vendor/apf-deep-code` for the repo angle.
 
 If your environment does not let you spawn the angle agents, do the same angles yourself, one after another, and say so in the dossier.
 
