@@ -425,18 +425,18 @@ flowchart TD
     AS -->|"enterprise fit per option"| AE
     AE -->|"candidate outputs"| ADV[Adversarial agents]
     ADV -->|"findings, ungrounded claims"| AE
-    AE -->|"option-table.md"| G1{{"Gate 1: YOU pick option"}}
-    G1 -->|"chosen option"| AE
+    AE -->|"gate-1.md, relayed by EM"| G1{{"Gate 1: YOU pick option"}}
+    G1 -->|"chosen option, relayed by EM"| AE
     AE -->|"SPEC draft"| DRAFTS
-    DRAFTS -->|"drafts/SPEC-NNN.md"| G2{{"Gate 2: YOU approve spec"}}
+    DRAFTS -->|"drafts/SPEC-NNN.md, relayed by EM"| G2{{"Gate 2: YOU approve spec"}}
     G2 -->|"approved spec"| SPECS
     SPECS -->|"specs/SPEC-NNN.md"| SOP
     SOP -->|"SOP draft"| DRAFTS
-    DRAFTS -->|"drafts/SOP-NNN.md"| G3{{"Gate 3: YOU approve SOP"}}
+    DRAFTS -->|"drafts/SOP-NNN.md, relayed by EM"| G3{{"Gate 3: YOU approve SOP"}}
     G3 -->|"approved SOP"| SOPS
     SPECS -->|"spec (requirements, design)"| AE
     SOPS -->|"SOP (operational hooks)"| AE
-    AE -->|"apf-plan: plans/SPEC-NNN.md, waves + deps"| PLANS
+    AE -->|"apf-plan: plans/SPEC-NNN.md, waves + deps; AExpert then shut down"| PLANS
     PLANS -->|"plan"| EM
     EM -->|"unit + spec + SOP + plan"| LANES["Lanes: Developer-i + Tester-i,<br/>one worktree per unit"]
     LANES -->|"lane report + branch"| INT[WaveMerger]
@@ -461,8 +461,8 @@ flowchart TD
     AE -.->|"redo component, cap 2"| AC
     AE -.->|"redo component, cap 2"| ACL
     AE -.->|"redo component, cap 2"| AS
-    G2 -.->|"change requests"| AE
-    G3 -.->|"scoped re-run request"| AE
+    G2 -.->|"change requests, relayed by EM"| AE
+    G3 -.->|"scoped re-run request, relayed by EM"| AE
     SOP -.->|"spec operational-hook gaps"| AE
 ```
 
