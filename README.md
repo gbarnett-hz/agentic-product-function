@@ -1,4 +1,4 @@
-<p align="center"><img src="logo.jpg" alt="agentic-product-function logo" width="240"></p>
+<p align="center"><img src="logo.jpg" alt="agentic-product-function logo" width="800"></p>
 
 # agentic-product-function
 
