@@ -15,7 +15,7 @@ You are the main session. You never plan, design or write code yourself. You wat
                       "spec": "specs/SPEC-001.md", "sop": "sops/SOP-001.md", "plan": "plans/SPEC-001.md",
                       "branch": "prd/PRD-001", "wave": 1, "gap_cycles": 0, "own_write": false,
                       "title": "<PRD title>", "waiting_on": "you|lane|capacity|agents|none", "waiting_for": "<e.g. gate 2: approve the spec>",
-                      "gap_round": 0, "open_gaps": 0, "steps": {"done": 0, "total": 0}, "wave": {"current": 0, "total": 0}, "updated": "<UTC>", "pr": "<url|null>"}}}
+                      "architect": "<AExpert agent name|null>", "gap_round": 0, "open_gaps": 0, "steps": {"done": 0, "total": 0}, "wave": {"current": 0, "total": 0}, "updated": "<UTC>", "pr": "<url|null>"}}}
 ```
 
 ## Status updates
@@ -31,11 +31,20 @@ Set `waiting_on` and `waiting_for` whenever the PRD is waiting, so the dashboard
 ## Watching
 Start `python3 <skill dir>/scripts/watch-dir.py prds .agentic-team/seen.txt PRD edits` with the Monitor tool (`timeout_ms: 1800000`). It waits for a file to stop changing and prints `NEW_PRD <path>` once per new file and `MOD_PRD <path>` each time a seen PRD's content changes (with `edits` it polls every 2s). Re-arm it when it expires; nothing is lost.
 
-On `NEW_PRD`: tell the user in one line, add it to state as `queued`, run the PRD gap flow (`flows/prd-gap.md`) with phase `prd-gap`, and only when it reports `No open gaps.` run the architecture flow (`flows/architecture.md`). On `MOD_PRD`: if `own_write` is true for that PRD, clear it and ignore the event (you caused it). Otherwise run the PRD gap flow on the new version, then follow its rules for a PRD that changed after architecture started.
+On `NEW_PRD`: tell the user in one line, add it to state as `queued`, run the PRD gap flow (`flows/prd-gap.md`) with phase `prd-gap`, and only when it reports `No open gaps.` spawn AExpert (see Architecture dispatch). On `MOD_PRD`: if `own_write` is true for that PRD, clear it and ignore the event (you caused it). Otherwise run the PRD gap flow on the new version, then follow its rules for a PRD that changed after architecture started.
 
-Whenever you write the PRD yourself (applying gap decisions), set `own_write: true` first, then re-run PRDGap yourself; that re-run is the "after every modification" rule. While you are in architecture with the user, lanes keep running in the background and their messages queue up; act on them at the next opportunity.
+Whenever you write the PRD yourself (applying gap decisions), set `own_write: true` first, then re-run PRDGap yourself; that re-run is the "after every modification" rule. Architecture runs in a background agent, so lanes and other PRDs keep moving; act on messages as they arrive.
 
 If `researchers` ≥ 1, start a second watcher the same way: `python3 <skill dir>/scripts/watch-dir.py research .agentic-team/seen-research.txt RESEARCH`. On `NEW_RESEARCH`: tell the user in one line, add the request to state as `queued`, and run `flows/research.md`. Re-arm it when it expires.
+
+## Architecture dispatch (see `flows/architecture.md`)
+AExpert is a spawned agent per PRD. It lives from your spawn until it hands you the plan; it cannot talk to the user, so you relay its gates. Several PRDs can be in architecture at once.
+1. **Spawn** when the PRD's last PRDGap round is clean: description `[AExpert] PRD-NNN architecture`, name `AExpert PRD-NNN`, prompt = `roles/architect-chief.md`, the PRD path and the context-hygiene contract. Record `architect` and phase `architecture`.
+2. **`STAGE <what>`** from AExpert: update state and send the status line.
+3. **`GATE <n> <path>`**: set `waiting_on: you` and `waiting_for`. Present gates to the user one at a time in arrival order: read the gate file and show it (gate 1: ask with `AskUserQuestion`, one option per row plus a scoped re-run; gates 2 and 3: show the draft path and ask approve or changes). Answer **verbatim** to AExpert with SendMessage (`approved`, the chosen option, or the requested changes), then clear `waiting_on`. Never answer a gate yourself.
+4. **`SPAWN ...`** lines (AExpert could not spawn): spawn those agents with their labels and the contract, then SendMessage AExpert their output paths.
+5. **`PLAN <path> steps <P> waves <W>`**: set `plan`, `steps.total = P`, `wave.total = W`, phase `planned`, `architect: null`. AExpert is finished: never message it again. Start engineering dispatch.
+6. **PRD changed while `architect` is set:** SendMessage AExpert the new PRD path to re-run scoped to what changed. **After `PLAN`:** tell the user in one line and ask whether to spawn a **new** AExpert for a scoped re-run, and spawn one (given the files) for any Requirement Gap with the gap report path.
 
 ## Test isolation
 Worktrees run tests concurrently, so the EM keeps them independent (rules in the "Test isolation" section of `conventions.md`).
@@ -63,7 +72,7 @@ After gate 3 nothing asks the human unless a cap escalates (dev-test, WaveMerger
 ## Never
 - Continue a finished agent for a new task, paste documents or diffs into a prompt, or read lane reports and findings you do not need to act on.
 - Give two live worktrees the same key or port block, or run two units that need the same exclusive resource at once.
-- Talk to the user about architecture content (AExpert does that).
+- Answer an architecture question or gate yourself, or keep an AExpert alive after it has handed over the plan.
 - Dispatch beyond capacity.
 - Re-trigger a PRD or research request already in state (a `MOD_PRD` is a revision of the same PRD, handled by the PRD gap flow).
 - Start architecture on a PRD whose last PRDGap round was not clean.

@@ -157,7 +157,7 @@ It writes `drafts/PRD-001.md` and edits it with you. After every change to the d
 When you say it is ready (and the last round is clean), it writes `prds/PRD-001-api-rate-limiting.md` in one write. **That write starts the flow.** If you edit the PRD in `prds/` later, the EM sees the change and runs the gap analysis again.
 
 ### 4. Architecture runs
-The EM flags the new PRD in one line and hands over to **AExpert** (you now talk to AExpert about architecture). Behind the scenes:
+Once the PRD is gap-clean the EM flags it in one line and spawns an **AExpert** agent for that PRD. AExpert lives from then until it hands the finished plan to the EM, then it and its architects are shut down. It cannot talk to you directly: at each gate it writes the gate to a file, and the EM shows it to you and passes your answer back. Behind the scenes:
 1. ACore reads your codebase (`apf-deep-code`), writes or refreshes `conventions.md` (your formatters, linters, patterns, and each technology's idiom), then proposes competing designs (`apf-group-design`).
 2. ACloud and ASolution run in parallel on ACore's output (`apf-deep-research`: your knowledge repo first, then the web): cloud side effects, and fit in enterprise deployments.
 3. AExpert launches adversarial agents, chosen for this PRD (for example: "what breaks during a rolling upgrade?", "is every claim cited?"). It can send components back to the architects, at most 2 rounds.
@@ -165,12 +165,12 @@ The EM flags the new PRD in one line and hands over to **AExpert** (you now talk
 You can step away. It takes a while.
 
 ### 5. Gate 1: pick an option
-If `conventions.md` is new or changed, AExpert shows it first so you can correct it. Then a short table: one row per option, scored on **risk, complexity, future evolution, fit for purpose**, with links to the detail, plus its recommendation. You can:
+If `conventions.md` is new or changed, the gate includes it so you can correct it. Then a short table: one row per option, scored on **risk, complexity, future evolution, fit for purpose**, with links to the detail, plus its recommendation. You can:
 - Pick an option: "Option B".
 - Ask for a scoped re-run: "redo ACloud, assuming multi-region".
 
 ### 6. Gate 2: approve the spec
-AExpert writes `drafts/SPEC-001.md` in the fixed spec template and shows it to you. Ask for changes in plain language; it edits the draft in place. Every requirement has an ID (`R-1`...) linked to your `PR-n`. When you approve, it moves to `specs/SPEC-001.md`.
+AExpert writes `drafts/SPEC-001.md` in the fixed spec template and the EM shows it to you. Ask for changes in plain language; it edits the draft in place. Every requirement has an ID (`R-1`...) linked to your `PR-n`. When you approve, it moves to `specs/SPEC-001.md`.
 
 ### 7. Gate 3: approve the SOP
 SOP builds `drafts/SOP-001.md` from the approved spec: one runbook scenario per risk ("if you see X, do Y, roll back with Z"). If a risk has no usable monitoring signal, the SOP records a gap and AExpert fixes the spec first (you re-approve that part).
@@ -198,7 +198,7 @@ The **Verifier** checks the output against every requirement ID and SOP scenario
 - **Gaps:** the Requirement Gap flow runs (next section). At most 2 gap cycles, then it escalates to you.
 
 ### 11. Next PRD
-Just run `/apf-create-prd` again. PRDs run through architecture one at a time (the main session is busy with you), while lanes keep building earlier plans in the background.
+Just run `/apf-create-prd` again. Each PRD gets its own AExpert, so several PRDs can be in architecture at once while lanes keep building earlier plans. Their gates reach you one at a time, in the order they arrive; the dashboard's "Needs you" lists everything waiting.
 
 ### 12. Run a spike (research)
 ```
@@ -240,7 +240,7 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 |---|---|
 | `/apf-start` stops and asks for foundations | The three files are missing from the project root. Run `/apf-product-foundations`. |
 | Wrote a PRD, nothing happened | EM was not running. Start it, then move the PRD out of `prds/` and back in. |
-| Edited a PRD and the EM asked questions | Expected: every modification triggers PRDGap, and a change after the spec is approved asks whether to run a scoped re-run of architecture. |
+| Edited a PRD and the EM asked questions | Expected: every modification triggers PRDGap, and a change after the plan was handed over asks whether to spawn a new AExpert for a scoped re-run. |
 | Wrote a research request, nothing happened | The EM was not running with `researchers` ≥ 1. Start it, then move the request out of `research/` and back in. |
 | Research requests queue | All researcher lanes are busy; they start when a lane reports free. Check `state.json`. |
 | Units not starting | All lanes busy; units queue until a lane reports free. Check `state.json`. |
@@ -253,8 +253,8 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Agent | Role |
 |---|---|
 | **YOU** | Human in the loop. Write PRDs (with `apf-create-prd`), make every approval decision at gates 1-3. |
-| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), runs the PRD gap flow, hands control to AExpert once it is clean, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. Announces every state transition (chat line plus `.agentic-team/status.md`). |
-| **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `apf-plan`. A role the main session plays after the EM hands over. |
+| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), runs the PRD gap flow, spawns AExpert once it is clean and relays its gates to you, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. Announces every state transition (chat line plus `.agentic-team/status.md`). |
+| **AExpert** (architect-chief) | Manager of the architecture team and the final word on architecture. A **spawned agent per PRD**: the EM spawns it when the PRD is gap-clean and it is shut down when it hands the plan to the EM. Spawns the architects and the adversarial agents, writes the spec, runs `apf-plan`. Does not talk to you directly: gates 1-3 go through the EM. |
 | **PRDGap** (prd-gap) | Finds what the PRD leaves unsaid (ambiguity, untestable requirements, conflicts, hidden dependencies, operational needs) from foundations, earlier PRDs, specs, research, code, git and web. Proposes a cited answer per gap. Runs after every PRD modification, so the flow after gates 2 and 3 needs no questions. |
 | **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the PRD, then `apf-group-design` to formulate candidate designs. |
 | **ACloud** (architect-cloud) | ACore's output + `apf-deep-research`: side effects on cloud deployment. |
@@ -286,7 +286,7 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Conventions (incl. test isolation) | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, WaveMerger, Verifier | `templates/conventions.md` |
 | Candidate options | `.agentic-team/arch/PRD-NNN/acore.md` | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | `.agentic-team/arch/PRD-NNN/acloud.md`, `asolution.md` | ACloud / ASolution | AExpert | none |
-| Option table (gate 1) | shown to you | AExpert | YOU | `templates/option-table.md` |
+| Option table (gate 1) | `.agentic-team/arch/PRD-NNN/gate-1.md`, relayed by the EM | AExpert | YOU | `templates/option-table.md` |
 | Spec draft | `drafts/SPEC-NNN.md` | AExpert | YOU, SOP | `templates/spec.md` |
 | Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SOP, `apf-plan`, lanes, WaveMerger, Verifier | `templates/spec.md` |
 | SOP draft | `drafts/SOP-NNN.md` | SOP | YOU, AExpert | `templates/sop.md` |
@@ -322,15 +322,15 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | 3 | **YOU** | each gap | accepted, edited or waived |
 | 4 | caller | decisions | PRD updated (answers into sections, waivers into section 8); back to step 1 |
 
-Done is a round with `No open gaps.` The PRD is published, or handed to AExpert, only then. A PRD edited after architecture started is re-analysed; before spec approval architecture restarts scoped to the change, after it the EM asks whether to run a scoped re-run.
+Done is a round with `No open gaps.` The PRD is published, or handed to AExpert, only then. A PRD edited after architecture started is re-analysed; while AExpert is still running it is told to re-run scoped to the change, after the plan was handed over the EM asks whether to spawn a new AExpert for a scoped re-run.
 
-### Architecture (owner: AExpert)
+### Architecture (owner: AExpert, a spawned agent per PRD)
 
 Precondition: the PRD gap analysis is clean.
 
 | Step | Actor | Input | Output |
 |---|---|---|---|
-| 1 | EM | `prds/PRD-NNN.md` (NEW_PRD event) | handover to AExpert |
+| 1 | EM | gap-clean `prds/PRD-NNN.md` | spawns AExpert for this PRD |
 | 2 | ACore | PRD, repo | understanding + candidate options |
 | 3 | ACloud, ASolution (parallel) | ACore output | cloud impact, enterprise fit |
 | 4 | AExpert + adversarial agents | all outputs | findings; redo requests (cap 2 rounds) |
@@ -339,9 +339,9 @@ Precondition: the PRD gap analysis is clean.
 | 7 | **Gate 2** (you) | draft spec | approval, or changes (loop to 6) → `specs/` |
 | 8 | SOP | approved spec | `drafts/SOP-NNN.md` (+ gaps) |
 | 9 | **Gate 3** (you) | draft SOP | approval → `sops/`, or a scoped re-run of the architecture flow (fresh 2-round cap) |
-| 10 | AExpert | spec AND SOP approved | `plans/SPEC-NNN.md` → EM |
+| 10 | AExpert | spec AND SOP approved | `plans/SPEC-NNN.md` → EM; AExpert is shut down |
 
-A spec change caused by SOP feedback needs re-approval of the delta only. The gate to the EM is spec approved AND SOP approved.
+A spec change caused by SOP feedback needs re-approval of the delta only. The gate to the EM is spec approved AND SOP approved. **Lifetime:** the architecture function for a PRD runs from the EM's spawn until AExpert replies `PLAN`. AExpert writes each gate to a file and ends its turn; the EM shows it to you and resumes AExpert with your answer. Later work (a Requirement Gap, a PRD change after the plan) gets a **new** AExpert given the files.
 
 ### Engineering (owner: EM)
 
@@ -358,7 +358,7 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 
 ### Requirement Gap (lighter variant of the architecture flow)
 1. The Verifier writes a gap report: each unmet or partial requirement ID or SOP item, with evidence.
-2. The EM hands it to AExpert and counts the cycle.
+2. The EM spawns a **new** AExpert for the gap and counts the cycle.
 3. AExpert runs a scoped flow: ACore (`apf-deep-code` on the gap only); ACloud/ASolution only if the gap touches their area; adversarial review narrowed to the gap; gate 1 skipped (the chosen option stands). A needed spec or SOP change goes to you for re-approval (gates 2/3); otherwise no human gate.
 4. AExpert runs a scoped `apf-plan` for only the units that close the gap.
 5. The EM dispatches to idle lanes, merges, and the Verifier checks again.
@@ -413,7 +413,7 @@ flowchart TD
     EM -->|"PRD, after every change"| PG
     PG -->|"No open gaps"| EM
     CTX -->|"code, git, web, research"| PG
-    EM -->|"PRD path, only when gap analysis is clean"| AE[AExpert]
+    EM -->|"spawn AExpert per PRD, only when gap analysis is clean"| AE[AExpert]
     AE -->|"PRD + context"| AC[ACore]
     CTX -->|"code, history"| AC
     AC -->|"understanding (apf-deep-code)"| ACL[ACloud]
@@ -518,7 +518,8 @@ flowchart TD
 
 | Rule | Value |
 |---|---|
-| Who talks to you about architecture | AExpert only |
+| Who talks to you about architecture | AExpert, through the EM: it writes each gate to a file and the EM relays it and your answer |
+| Architecture lifetime | AExpert and its architects are spawned per PRD when the PRD is gap-clean and shut down when the plan is handed to the EM; later work gets new agents |
 | Status updates | on every state transition: one chat line, `state.json` updated, `.agentic-team/status.md` re-rendered; the dashboard's "Needs you" lists everything waiting on you |
 | PRD gap analysis | after every PRD modification, until `No open gaps.`; max 10 gaps per round; no architecture before it is clean |
 | Free-running after gate 3 | no questions to you unless a cap escalates; unanswered ambiguity becomes a recorded assumption in the PR description |
@@ -612,7 +613,8 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
 - Naming: you wrote both `spike` and `spikes`; this uses `spikes/` (with `docs/` and `projects/`). Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate. Say if you want either changed.
-- The main session is the EM and also plays AExpert, so its context grows across PRDs. The rules keep it small (summaries only, detail in files, `state.json` as memory) but it is not cleared; it relies on Claude Code's automatic compaction and recovers from `state.json` and the files.
+- The main session is the EM and never plays AExpert, so its context grows only with summaries, relayed gates and `state.json`; it is not cleared and relies on Claude Code's automatic compaction.
+- AExpert as a spawned agent assumes it can spawn its own architects and be resumed after each gate with SendMessage. If it cannot spawn, it asks the EM to spawn on its behalf (`SPAWN` lines); this fallback and the resume are untested.
 - Developers and testers read only their unit's slice, which depends on the plan's `Cites:` lines being complete. A step that omits a requirement or SOP scenario it depends on makes the agent read it on demand, or miss it; the Verifier still checks the whole output against every requirement and scenario.
 - Test isolation is enforced by review (tester and Verifier read the tests and run them with the keyed environment), not by a sandbox. A test that ignores the key can still collide. Real shared environments (staging, cloud accounts) are only protected if they are listed as exclusive.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
