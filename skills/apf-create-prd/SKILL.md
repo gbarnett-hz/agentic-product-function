@@ -33,8 +33,15 @@ Rules while interviewing:
 ## 3. Draft
 Write the draft to `drafts/PRD-NNN.md` (not `prds/`). Show it to the user and edit it in place for requested changes. Status stays `Draft`.
 
+## 3b. Gap analysis (after every change to the draft)
+Run the PRD gap flow from the sibling `apf-start` skill (`../apf-start/flows/prd-gap.md`, role `../apf-start/roles/prd-gap.md`, report template `../apf-start/templates/prd-gap-report.md`; if `apf-start` is not installed, tell the user to install it and stop). The goal is that the team needs no questions after the architecture and SOP sign-off.
+1. Spawn a subagent with description `[PRDGap] PRD-NNN analysis` and the role file; it writes `drafts/PRD-NNN.gaps.md`.
+2. For each open gap, ask the user with `AskUserQuestion`: the proposed answer (with its evidence) as the recommended option, plus "edit" and "waive". `needs-human` gaps get an open question or a waiver.
+3. Apply the decisions: accepted or edited answers go into the sections they affect (keep PR-n IDs stable; a new requirement takes the next free number); a waiver goes under section 8 as `Waived G-n: <gap>. Default assumed: <default or "architects decide">`.
+4. That edit is a modification, so run the analysis again. Repeat until a round reports `No open gaps.` The same applies to any edit the user makes to the draft at any time.
+
 ## 4. Publish
-Only when the user says it is ready:
+Only when the user says it is ready **and the last gap analysis round reported `No open gaps.`** (if the draft changed since, run it again first):
 1. Set Status to `Ready`, set the date.
 2. Write it to `prds/PRD-NNN-<short-slug>.md` in a single write (the watcher waits for the file to settle, but a single write is safest). Remove the draft.
 3. Tell the user the path. The EM picks it up only if it is already running (`/apf-start lanes=N`): the watcher treats any PRD that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `prds/`.

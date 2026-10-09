@@ -1,6 +1,6 @@
 # Flow: research
 
-Owner: EM. Capacity = number of researcher lanes (`researchers=M`), independent of the engineering lanes. A researcher lane is four role agents: **researcher**, **ResearchJudge**, **ResearchDocWriter** and **ResearchEngineer**. One request occupies a whole lane, from start to finish, and is never split across lanes.
+Owner: EM. Capacity = number of researcher lanes (`researchers=M`), independent of the engineering lanes. A researcher lane is four role agents: **researcher**, **ResearchJudge**, **ResearchDocWriter** and **ResearchEngineer**. Each lane owns its own four agents (1:1 with its researcher, like developer:tester), so `researchers=M` gives M of each and the producers are never a shared bottleneck. One request occupies a whole lane, from start to finish, and is never split across lanes.
 
 ```
 research/RR-NNN-slug.md ─(NEW_RESEARCH)─► EM ─► idle researcher lane Rk

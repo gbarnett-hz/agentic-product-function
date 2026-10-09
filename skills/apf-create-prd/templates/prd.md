@@ -34,7 +34,7 @@ How we know it worked: metric, target, how measured.
 Technical, regulatory, timeline, or other teams and systems this depends on.
 
 ## 8. Risks and open questions
-Known risks and unresolved items.
+Known risks and unresolved items. Gaps the author waived during gap analysis are recorded here as `Waived G-n: <gap>. Default assumed: <default or "architects decide">`.
 
 ## 9. References
 Links to research, market analysis, vision documents, related PRDs.

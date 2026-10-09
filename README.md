@@ -30,10 +30,10 @@ Organisation (grouping only, no flows; the flows are below):
 ║ │    architect-core   │ │   architect-cloud   │ │  architect-solution │  ║
 ║ │       [ACore]       │ │       [ACloud]      │ │     [ASolution]     │  ║
 ║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
-║                         ┌─────────────────────┐                          ║
-║                         │     support-sop     │                          ║
-║                         │        [SOP]        │                          ║
-║                         └─────────────────────┘                          ║
+║ ┌─────────────────────┐ ┌─────────────────────┐                          ║
+║ │       prd-gap       │ │     support-sop     │                          ║
+║ │       [PRDGap]      │ │        [SOP]        │                          ║
+║ └─────────────────────┘ └─────────────────────┘                          ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 ╔═ engineering (lane = developer + tester) ════════════════════════════════╗
 ║                     ┌──────────────────────────────┐                     ║
@@ -152,7 +152,9 @@ Start the EM *before* writing the PRD. The watchers treat any PRD or research re
 ```
 The skill orients itself (next ID, the three foundation files, research files if present), then interviews you in small batches: problem, goals and non-goals, users, requirements, success metrics, constraints and risks. It pushes back on vague requirements ("fast", "scalable") and asks for a measurable criterion. It keeps requirements to *what*, not *how*. Requirement IDs are `PR-1`, `PR-2`, ...
 
-It writes `drafts/PRD-001.md` and edits it with you. When you say it is ready, it writes `prds/PRD-001-api-rate-limiting.md` in one write. **That write starts the flow.**
+It writes `drafts/PRD-001.md` and edits it with you. After every change to the draft, **PRDGap** reads your foundations, earlier PRDs, specs, research, the code and git, and the web, and lists what the team would otherwise have to ask you later: vague requirements, missing targets, conflicts, hidden dependencies, operational needs. Each gap comes with a proposed answer and its evidence. You accept, edit or waive each one; accepted answers go into the PRD and waivers are recorded in section 8. Every such edit triggers another round, until a round reports `No open gaps.` The aim is that, after you sign off the spec and the SOP, nobody needs to ask you anything.
+
+When you say it is ready (and the last round is clean), it writes `prds/PRD-001-api-rate-limiting.md` in one write. **That write starts the flow.** If you edit the PRD in `prds/` later, the EM sees the change and runs the gap analysis again.
 
 ### 4. Architecture runs
 The EM flags the new PRD in one line and hands over to **AExpert** (you now talk to AExpert about architecture). Behind the scenes:
@@ -205,7 +207,7 @@ Just run `/apf-create-prd` again. PRDs run through architecture one at a time (t
 ```
 The skill interviews you and writes a research request in the fixed template: objective, specific research questions (`Q-1`...), context, scope, sources to consult, depth (`quick` / `standard` / `deep`), exit criteria, deliverable (`document`, `project` or `ResearchJudge decides`) and constraints. When you approve, it writes `research/RR-001-<slug>.md`, which the EM picks up.
 
-An idle researcher lane takes the whole request. Its **researcher** investigates with several angle agents in parallel (repo, web, papers, standards, prior art, and always adversarial ones that try to disprove the leading conclusions), then hands the findings to the lane's **research the ResearchJudge**. The ResearchJudge checks them against your exit criteria (sending gaps back, at most 2 rounds), decides the artifact type, and routes to exactly one producer:
+An idle researcher lane takes the whole request. Its **researcher** investigates with several angle agents in parallel (repo, web, papers, standards, prior art, and always adversarial ones that try to disprove the leading conclusions), then hands the findings to the lane's **ResearchJudge**. The ResearchJudge checks them against your exit criteria (sending gaps back, at most 2 rounds), decides the artifact type, and routes to exactly one producer:
 - a **ResearchDocWriter** writes `spikes/docs/RR-001-<slug>.md`, or
 - a **ResearchEngineer** builds and runs `spikes/projects/RR-001-<slug>/`.
 
@@ -216,7 +218,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 |---|---|
 | `/apf-start` stops and asks for foundations | The three files are missing from the project root. Run `/apf-product-foundations`. |
 | Wrote a PRD, nothing happened | EM was not running. Start it, then move the PRD out of `prds/` and back in. |
-| Edited a PRD and nothing happened | Edits to a seen PRD are ignored. Drop the revision in as a new file (new ID). |
+| Edited a PRD and the EM asked questions | Expected: every modification triggers PRDGap, and a change after the spec is approved asks whether to run a scoped re-run of architecture. |
 | Wrote a research request, nothing happened | The EM was not running with `researchers` ≥ 1. Start it, then move the request out of `research/` and back in. |
 | Research requests queue | All researcher lanes are busy; they start when a lane reports free. Check `state.json`. |
 | Units not starting | All lanes busy; units queue until a lane reports free. Check `state.json`. |
@@ -230,8 +232,9 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | Agent | Role |
 |---|---|
 | **YOU** | Human in the loop. Write PRDs (with `apf-create-prd`), make every approval decision at gates 1-3. |
-| **EM** (engineering-manager) | The main session. Watches `prds/` (kqueue on macOS, poll fallback elsewhere, via Monitor), starts the flow, hands control to AExpert, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. |
+| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), runs the PRD gap flow, hands control to AExpert once it is clean, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. |
 | **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `apf-plan`. A role the main session plays after the EM hands over. |
+| **PRDGap** (prd-gap) | Finds what the PRD leaves unsaid (ambiguity, untestable requirements, conflicts, hidden dependencies, operational needs) from foundations, earlier PRDs, specs, research, code, git and web. Proposes a cited answer per gap. Runs after every PRD modification, so the flow after gates 2 and 3 needs no questions. |
 | **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the PRD, then `apf-group-design` to formulate candidate designs. |
 | **ACloud** (architect-cloud) | ACore's output + `deep-research`: side effects on cloud deployment. |
 | **ASolution** (architect-solution) | ACore's output + `deep-research`: the PRD in enterprise deployments with existing services. |
@@ -239,7 +242,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | **Lane** (Developer-i + Tester-i) | A developer paired with a tester. N lanes, set at invocation. Each unit of work is isolated in a git worktree. |
 | **WaveMerger** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
 | **Verifier** | Checks finished work against the PRD, spec requirement IDs and SOP. Produces a gap report. |
-| **Researcher lane** (Researcher + ResearchJudge + ResearchDocWriter + ResearchEngineer) | M lanes, set at invocation (`researchers=M`). A lane takes one research request in its entirety. |
+| **Researcher lane** (Researcher + ResearchJudge + ResearchDocWriter + ResearchEngineer) | M lanes, set at invocation (`researchers=M`). Each lane has its own Researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer (1:1, like Developer:Tester), so there is no shared producer pool. A lane takes one research request in its entirety. |
 | **Researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `apf-deep-code`): repo, web, papers, standards, prior art. Writes findings. |
 | **ResearchJudge** | Checks the findings against the exit criteria (gaps go back to the researcher, cap 2), decides the artifact type (`document` or `project`) and routes to one producer. |
 | **ResearchDocWriter** | Writes the spike document to `spikes/docs/`. |
@@ -258,6 +261,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | Company context | `company-context.md` | `apf-product-foundations` | apf-create-prd, AExpert, ACloud, ASolution, SOP | `apf-product-foundations/templates/company-context.md` |
 | Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `apf-product-foundations` | every agent in the project | none |
 | Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | apf-create-prd, AExpert, architects | none |
+| PRD gap report | `drafts/PRD-NNN.gaps.md` | PRDGap | YOU, `apf-create-prd`, EM | `templates/prd-gap-report.md` |
 | Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, WaveMerger, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
@@ -267,12 +271,12 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | SOP draft | `drafts/SOP-NNN.md` | SOP | YOU, AExpert | `templates/sop.md` |
 | SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `apf-plan`, lanes, WaveMerger, Verifier | `templates/sop.md` |
 | Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `apf-plan` | EM, lanes, WaveMerger | `vendor/apf-plan` |
-| Research request draft | `drafts/RR-NNN.md` | `apf-research` | YOU | `research/templates/research-request.md` |
-| Research request | `research/RR-NNN-<slug>.md` | `apf-research` (on your go-ahead) | watcher → EM, researcher, ResearchJudge | `research/templates/research-request.md` |
+| Research request draft | `drafts/RR-NNN.md` | `apf-research` | YOU | `apf-research/templates/research-request.md` |
+| Research request | `research/RR-NNN-<slug>.md` | `apf-research` (on your go-ahead) | watcher → EM, researcher, ResearchJudge | `apf-research/templates/research-request.md` |
 | Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, ResearchJudge | ResearchJudge, ResearchDocWriter, ResearchEngineer | none |
 | Spike document | `spikes/docs/RR-NNN-<slug>.md` | ResearchDocWriter | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-document.md` |
 | Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | ResearchEngineer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-project-readme.md` |
-| Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt`, `.agentic-team/seen-research.txt` | EM only | EM | `roles/engineering-manager.md` |
+| Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt` (+ `.sha` for PRD edit detection), `.agentic-team/seen-research.txt` | EM only | EM | `roles/engineering-manager.md` |
 | Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | WaveMerger, Verifier | none |
 | Handoff package | in the WaveMerger's prompt | EM | WaveMerger | `templates/handoff-package.md` |
 | Integration branch | `prd/PRD-NNN` | WaveMerger | Verifier, EM | git |
@@ -285,7 +289,20 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 
 ## Flows
 
+### PRD gap analysis (owner: `apf-create-prd`, then the EM)
+
+| Step | Actor | Input | Output |
+|---|---|---|---|
+| 1 | `apf-create-prd` or EM | a new or modified PRD | spawns PRDGap |
+| 2 | PRDGap | PRD, foundations, knowledge repo, code, git, web | `drafts/PRD-NNN.gaps.md`: open gaps only, max 10, each with a proposed answer and evidence |
+| 3 | **YOU** | each gap | accepted, edited or waived |
+| 4 | caller | decisions | PRD updated (answers into sections, waivers into section 8); back to step 1 |
+
+Done is a round with `No open gaps.` The PRD is published, or handed to AExpert, only then. A PRD edited after architecture started is re-analysed; before spec approval architecture restarts scoped to the change, after it the EM asks whether to run a scoped re-run.
+
 ### Architecture (owner: AExpert)
+
+Precondition: the PRD gap analysis is clean.
 
 | Step | Actor | Input | Output |
 |---|---|---|---|
@@ -325,7 +342,7 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 
 ### Research (owner: EM)
 
-A researcher lane is four role agents: researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer. `researchers=M` gives M lanes. One request occupies one lane from start to finish; it is never split across lanes.
+A researcher lane is four role agents: researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer. `researchers=M` gives M lanes. Each lane owns its own ResearchJudge, ResearchDocWriter and ResearchEngineer, 1:1 with its Researcher (like Developer:Tester in an engineering lane), so `researchers=M` gives M of each and the producers are never a shared bottleneck. One request occupies one lane from start to finish; it is never split across lanes.
 
 1. The EM's second watcher prints `NEW_RESEARCH <path>`; the EM queues the request.
 2. The EM assigns it to an **idle** researcher lane only; no idle lane means it queues. Researcher capacity is separate from the engineering lanes.
@@ -365,8 +382,14 @@ flowchart TD
     CP -->|"drafts/PRD-NNN.md"| DRAFTS
     DRAFTS -.->|"review, edits"| YOU
     CP -->|"prds/PRD-NNN-slug.md on go-ahead"| PRDS
-    PRDS -->|"NEW_PRD event (watcher)"| EM
-    EM -->|"PRD path"| AE[AExpert]
+    CP -->|"draft, after every change"| PG[PRDGap]
+    PG -->|"gaps + proposed answers"| CP
+    CP -->|"accept / edit / waive"| PG
+    PRDS -->|"NEW_PRD / MOD_PRD event (watcher)"| EM
+    EM -->|"PRD, after every change"| PG
+    PG -->|"No open gaps"| EM
+    CTX -->|"code, git, web, research"| PG
+    EM -->|"PRD path, only when gap analysis is clean"| AE[AExpert]
     AE -->|"PRD + context"| AC[ACore]
     CTX -->|"code, history"| AC
     AC -->|"understanding (apf-deep-code)"| ACL[ACloud]
@@ -471,6 +494,8 @@ flowchart TD
 | Rule | Value |
 |---|---|
 | Who talks to you about architecture | AExpert only |
+| PRD gap analysis | after every PRD modification, until `No open gaps.`; max 10 gaps per round; no architecture before it is clean |
+| Free-running after gate 3 | no questions to you unless a cap escalates; unanswered ambiguity becomes a recorded assumption in the PR description |
 | Grounding | Every claim cites a `file:line` or URL; AExpert enforces |
 | Architecture redo loop | 2 rounds, then escalate to you |
 | Scoped re-run after you change the SOP | fresh 2-round cap |
@@ -500,8 +525,9 @@ Decided once and used always.
 |---|---|---|
 | PRD | No single standard; the sections common across Atlassian, Product School and others (problem, goals/non-goals, users, requirements with acceptance criteria, metrics, constraints, open questions). PRD requirements get IDs (`PR-n`). | `templates/prd.md` |
 | Spec | IEEE 29148-style verifiable, ID'd requirements ("what", `R-n`) kept separate from the design ("how", RFC/design-doc style), with a MADR 4.0 decision record. | `templates/spec.md` |
-| Research request | Agile spike (question, exit criteria, deliverable) combined with a research brief (objective, context, scope, method, follow-ups). The spike's time-box becomes a depth level (quick / standard / deep) because agents do not work in days. Questions get IDs (`Q-n`). | `research/templates/research-request.md` |
+| Research request | Agile spike (question, exit criteria, deliverable) combined with a research brief (objective, context, scope, method, follow-ups). The spike's time-box becomes a depth level (quick / standard / deep) because agents do not work in days. Questions get IDs (`Q-n`). | `apf-research/templates/research-request.md` |
 | Spike (output) | Research report, answer first: summary and recommendation, answers per question with confidence, method, findings, counter-evidence, exit criteria, limitations, follow-ups, references. A project's README follows the same shape. | `templates/spike-document.md`, `templates/spike-project-readme.md` |
+| PRD gap report | Table of open gaps, each with the PRD location, why a downstream agent would have to ask, a proposed answer, its evidence and a kind (`evidence`, `assumption`, `needs-human`). Gap IDs `G-n`. | `templates/prd-gap-report.md` |
 | SOP | Incident-runbook structure: severity, detection, immediate response, investigation, mitigation, rollback, communication, escalation, post-incident. | `templates/sop.md` |
 
 Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources. The SOP structure comes from third-party runbook templates, not the Google SRE book or PagerDuty docs directly (those did not come up in search).
@@ -522,25 +548,25 @@ skills/
   apf-start/                installed as one skill; the whole folder is copied
     SKILL.md                               entry point: /apf-start lanes=N researchers=M
     roles/                                 engineering-manager, architect-chief, architect-core,
-                                           architect-cloud, architect-solution, support-sop,
+                                           architect-cloud, architect-solution, prd-gap, support-sop,
                                            developer, tester, wave-merger, verifier,
                                            researcher, research-judge, research-doc-writer,
                                            research-engineer
-    flows/                                 architecture.md, engineering.md, requirement-gap.md,
+    flows/                                 prd-gap.md, architecture.md, engineering.md, requirement-gap.md,
                                            research.md
     templates/                             spec, sop, conventions, option-table, gap-report,
                                            handoff-package, pr-description, spike-document,
-                                           spike-project-readme
+                                           spike-project-readme, prd-gap-report
     vendor/                                apf-deep-code, apf-group-design, apf-plan (read by path)
-    scripts/watch-dir.py                   kqueue watcher, takes an event tag: PRD, RESEARCH
-                                           (poll fallback elsewhere)
-  apf-create-prd/                              installed as its own skill
+    scripts/watch-dir.py                   watcher, takes an event tag (PRD, RESEARCH); with `edits`
+                                           it also reports MOD_<TAG> (kqueue, or 2s poll)
+  apf-create-prd/                          installed as its own skill; runs PRDGap from apf-start
     SKILL.md
     templates/prd.md
-  research/                                installed as its own skill
+  apf-research/                            installed as its own skill
     SKILL.md
     templates/research-request.md
-  apf-product-foundations/                     installed as its own skill; run once first
+  apf-product-foundations/                 installed as its own skill; run once first
     SKILL.md
     templates/                             product-vision, product-guiding-principles, company-context
 ```
@@ -552,6 +578,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 ## Known gaps
 
 - The watcher's non-macOS path is a 2-second poll, not inotify.
+- PRD edit detection (`MOD_PRD`) polls every 2 seconds on every platform, because an in-place edit does not wake kqueue. Simultaneous edits by you and the EM within the settle window coalesce into one event; the EM's own re-run catches any change it did not make.
 - `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
 - Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
