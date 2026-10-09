@@ -142,7 +142,7 @@ From here on the team uses them: architects rule out or flag options that violat
 ```
 /apf-start lanes=3 researchers=2
 ```
-This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` (and, when researchers ≥ 1, `research/ spikes/docs/ spikes/projects/`) if missing, writes `.agentic-team/state.json` with 3 idle engineering lanes and 2 idle researcher lanes, and arms the watchers for `prds/` and `research/`. 3 lanes means 3 developers, each paired with a tester. 2 researchers means 2 researcher lanes, each with its own researcher, the ResearchJudge, ResearchDocWriter and ResearchEngineer. Capacity is fixed for the session; `researchers=0` turns research off.
+This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` (and, when researchers ≥ 1, `research/ spikes/docs/ spikes/projects/`) if missing, writes `.agentic-team/state.json` with 3 idle engineering lanes and 2 idle researcher lanes, and arms the watchers for `prds/` and `research/`. 3 lanes means 3 developers, each paired with a tester. 2 researchers means 2 researcher lanes, each with its own researcher, the ResearchJudge, ResearchDocWriter and ResearchEngineer. Capacity is fixed for the session; `researchers=0` turns research off. It also creates `.agentic-team/status.md`, the progress dashboard (see [Follow progress](#follow-progress)).
 
 Start the EM *before* writing the PRD. The watchers treat any PRD or research request that already exists when they first start as already seen.
 
@@ -188,10 +188,7 @@ The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are bu
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
 - A wave must be merged before the next wave starts. If a plan is split across lanes, the **WaveMerger** merges the lane worktrees into `prd/PRD-001` and runs the full suite and the reproducer. A plan taken by one lane needs no merge.
 
-Check progress any time:
-```
-cat .agentic-team/state.json     # lanes, units, PRD phase, wave, PR URL
-```
+Progress is announced as it happens (see [Follow progress](#follow-progress)); raw state is in `.agentic-team/state.json`.
 
 ### 10. Verification and the PR
 The **Verifier** checks the output against every requirement ID and SOP scenario, citing code and test results.
@@ -213,6 +210,21 @@ An idle researcher lane takes the whole request. Its **researcher** investigates
 
 The EM tells you the artifact path when the lane is free again. There is no human gate: read the spike and decide. Architects and `/apf-create-prd` read `spikes/` as context for later work. Spikes are left uncommitted in your working tree.
 
+### Follow progress
+A PRD can take a long time and several can be in flight. The EM announces **every state transition** in two places:
+
+1. **A chat line** in your session: `[PRD-001] <what happened> · <phase> · <progress> · waiting on <who>`.
+```
+[PRD-001] PRD gap round 2: 3 open gaps · prd-gap · waiting on you
+[PRD-001] plan received: 23 steps in 4 waves · planned
+[PRD-001] step 7/23 done (wave 2/4) · engineering · Developer-2 on 8-9, round 2/3
+[PRD-002] queued: all 3 lanes busy · planned · waiting on capacity
+[RR-001] assigned to R1 · researching
+```
+2. **A dashboard**, `.agentic-team/status.md`, rewritten at every transition. In another terminal: `watch cat .agentic-team/status.md`. It shows, at the top, **what needs you** (gates, gap answers, blocked lanes, escalations); then every PRD with its phase pipeline, plan progress (`steps done/total`, wave n of W), lanes on it and PR link; all engineering lanes; researcher lanes and requests; and the last 20 events.
+
+"Step N of P" counts plan steps whose unit the tester has signed off (P is the number of Todo items in `plans/SPEC-NNN.md`). The dashboard is rendered by `scripts/render-status.py` from `.agentic-team/state.json`.
+
 ### Troubleshooting
 | Symptom | Cause / fix |
 |---|---|
@@ -232,7 +244,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | Agent | Role |
 |---|---|
 | **YOU** | Human in the loop. Write PRDs (with `apf-create-prd`), make every approval decision at gates 1-3. |
-| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), runs the PRD gap flow, hands control to AExpert once it is clean, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. |
+| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), runs the PRD gap flow, hands control to AExpert once it is clean, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. Announces every state transition (chat line plus `.agentic-team/status.md`). |
 | **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `apf-plan`. A role the main session plays after the EM hands over. |
 | **PRDGap** (prd-gap) | Finds what the PRD leaves unsaid (ambiguity, untestable requirements, conflicts, hidden dependencies, operational needs) from foundations, earlier PRDs, specs, research, code, git and web. Proposes a cited answer per gap. Runs after every PRD modification, so the flow after gates 2 and 3 needs no questions. |
 | **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the PRD, then `apf-group-design` to formulate candidate designs. |
@@ -276,6 +288,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, ResearchJudge | ResearchJudge, ResearchDocWriter, ResearchEngineer | none |
 | Spike document | `spikes/docs/RR-NNN-<slug>.md` | ResearchDocWriter | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-document.md` |
 | Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | ResearchEngineer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-project-readme.md` |
+| Status dashboard | `.agentic-team/status.md` | EM (via `scripts/render-status.py`) | YOU | none |
 | Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt` (+ `.sha` for PRD edit detection), `.agentic-team/seen-research.txt` | EM only | EM | `roles/engineering-manager.md` |
 | Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | WaveMerger, Verifier | none |
 | Handoff package | in the WaveMerger's prompt | EM | WaveMerger | `templates/handoff-package.md` |
@@ -323,7 +336,7 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 
 1. The EM dispatches the plan's units to **idle** lanes only, wave by wave. No idle lane means units queue, even when a plan is ready.
 2. Each unit gets a worktree. The lane's developer and tester receive the spec, the SOP, the whole plan (global context) and their unit (local context).
-3. developer → tester → comments → developer, **cap 3 rounds**, then escalate to the EM, then you. The tester declares the unit complete and tells the EM "I am done, I am now free".
+3. developer → tester → comments → developer, **cap 3 rounds**, then escalate to the EM, then you. The tester declares the unit complete and tells the EM which plan steps are done and "I am done, I am now free"; the EM reports `step N/P`.
 4. A crashed or stalled lane: the EM reassigns its unit to another idle lane.
 5. Plan split across lanes: after each wave the **WaveMerger** merges into `prd/PRD-NNN` (next wave branches from it). Plan taken by a single lane: no merge.
 6. The **Verifier** checks the output. `CONFORMS` → the EM pushes and opens the PR. Gaps → Requirement Gap.
@@ -424,6 +437,7 @@ flowchart TD
     VER -->|"CONFORMS"| EM
     EM -->|"gh pr create: pr-description.md"| PR([GitHub PR])
     PR -->|"review, merge"| YOU
+    EM -.->|"status line + status.md on every transition"| YOU
     SPK -->|"completed research"| AE
     SPK -->|"completed research"| CP
     FND -->|"vision, HC-n, P-n, context"| AE
@@ -494,6 +508,7 @@ flowchart TD
 | Rule | Value |
 |---|---|
 | Who talks to you about architecture | AExpert only |
+| Status updates | on every state transition: one chat line, `state.json` updated, `.agentic-team/status.md` re-rendered; the dashboard's "Needs you" lists everything waiting on you |
 | PRD gap analysis | after every PRD modification, until `No open gaps.`; max 10 gaps per round; no architecture before it is clean |
 | Free-running after gate 3 | no questions to you unless a cap escalates; unanswered ambiguity becomes a recorded assumption in the PR description |
 | Grounding | Every claim cites a `file:line` or URL; AExpert enforces |
@@ -560,6 +575,7 @@ skills/
     vendor/                                apf-deep-code, apf-group-design, apf-plan (read by path)
     scripts/watch-dir.py                   watcher, takes an event tag (PRD, RESEARCH); with `edits`
                                            it also reports MOD_<TAG> (kqueue, or 2s poll)
+    scripts/render-status.py               state.json -> .agentic-team/status.md dashboard
   apf-create-prd/                          installed as its own skill; runs PRDGap from apf-start
     SKILL.md
     templates/prd.md

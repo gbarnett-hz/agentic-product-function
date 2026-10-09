@@ -2,6 +2,8 @@
 
 Owner: EM. Capacity = number of lanes, fixed at invocation. A lane is a developer paired with a tester.
 
+Every transition below is announced by the EM (chat line, `state.json`, `.agentic-team/status.md`; see "Status updates" in `roles/engineering-manager.md`). On the plan arriving the EM sets the totals: P = number of Todo steps, W = number of waves.
+
 ## Dispatch
 1. The EM receives `plans/SPEC-NNN.md` (steps, waves, ordering constraints, N).
 2. For each wave, the EM assigns units to **idle** lanes only. No idle lane means the units queue, even if the plan is ready.
@@ -9,7 +11,7 @@ Owner: EM. Capacity = number of lanes, fixed at invocation. A lane is a develope
 4. The EM spawns the lane's developer and tester as subagents and gives each the spec, the SOP, the whole plan and its unit.
 
 ## Lane loop
-developer works in the worktree, following `conventions.md` and running its mechanical checks (format, lint, types, tests) until clean → sends to tester (SendMessage), who re-runs the checks and reviews idiom → tester comments → developer addresses → … **cap 3 rounds**, then escalate to the EM (then the human). When the tester is satisfied it declares the unit complete and tells the EM: "I am done, I am now free." The EM marks the lane idle and dispatches the next queued unit.
+developer works in the worktree, following `conventions.md` and running its mechanical checks (format, lint, types, tests) until clean → sends to tester (SendMessage), who re-runs the checks and reviews idiom → tester comments → developer addresses → … **cap 3 rounds**, then escalate to the EM (then the human). When the tester is satisfied it declares the unit complete and tells the EM which plan steps are complete and "I am done, I am now free." The EM adds them to the PRD's done count and reports `step N/P`. The EM marks the lane idle and dispatches the next queued unit.
 
 A crashed or stalled lane: the EM reassigns its unit to another idle lane.
 

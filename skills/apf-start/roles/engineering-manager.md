@@ -6,13 +6,26 @@ You are the main session. You never plan, design or write code yourself. You wat
 `.agentic-team/state.json` in the project is your memory. You are its only writer. Rewrite it on every state change; after a context compaction, trust it over recollection.
 
 ```json
-{"researchers": {"R1": {"state": "idle|working|blocked|failed", "request": "RR-001|null", "stage": "researching|judging|writing|building"}},
+{"updated": "<UTC timestamp>", "events": [{"ts": "<UTC>", "prd": "PRD-001|null", "text": "<what happened>"}],
+ "researchers": {"R1": {"state": "idle|working|blocked|failed", "request": "RR-001|null", "stage": "researching|judging|writing|building"}},
  "requests": {"RR-001": {"path": "research/RR-001-slug.md", "phase": "queued|researching|judging|producing|done", "artifact": "spikes/docs/RR-001-slug.md|spikes/projects/RR-001-slug/|null", "lane": "R1"}},
- "lanes": {"L1": {"state": "idle|working|blocked|failed", "prd": "PRD-001|null", "unit": "<plan step(s)>", "worktree": "<path>", "branch": "<name>"}},
+ "lanes": {"L1": {"state": "idle|working|blocked|failed", "prd": "PRD-001|null", "unit": "<plan step numbers, e.g. 8-9>", "round": 1, "note": "<why blocked>", "worktree": "<path>", "branch": "<name>"}},
  "prds": {"PRD-001": {"path": "prds/PRD-001.md", "phase": "queued|prd-gap|architecture|spec-review|sop-review|planned|engineering|verifying|gap|pr-open",
                       "spec": "specs/SPEC-001.md", "sop": "sops/SOP-001.md", "plan": "plans/SPEC-001.md",
-                      "branch": "prd/PRD-001", "wave": 1, "gap_cycles": 0, "own_write": false, "pr": "<url|null>"}}}
+                      "branch": "prd/PRD-001", "wave": 1, "gap_cycles": 0, "own_write": false,
+                      "title": "<PRD title>", "waiting_on": "you|lane|capacity|agents|none", "waiting_for": "<e.g. gate 2: approve the spec>",
+                      "gap_round": 0, "open_gaps": 0, "steps": {"done": 0, "total": 0}, "wave": {"current": 0, "total": 0}, "updated": "<UTC>", "pr": "<url|null>"}}}
 ```
+
+## Status updates
+The user cannot see inside a long run, so every state transition is announced. On each one, in this order:
+1. Update `state.json`: the changed fields, `updated`, and one entry appended to `events` (keep the last 50).
+2. Print **one chat line**: `[PRD-001] <what happened> · <phase> · <progress> · waiting on <who>`. Examples: `[PRD-001] PRD gap round 2: 3 open gaps · prd-gap · waiting on you`; `[PRD-001] step 7/23 done (wave 2/4) · engineering · Developer-2 on 8-9, round 2/3`; `[PRD-002] queued: all 3 lanes busy · planned · waiting on capacity`. Research: `[RR-001] assigned to R1 · researching`.
+3. Run `python3 <skill dir>/scripts/render-status.py` to rewrite `.agentic-team/status.md`, the dashboard for every PRD, lane, researcher lane and request in flight (the user can run `watch cat .agentic-team/status.md`).
+
+Transitions that always produce an update: a PRD or research request arriving, changing or being queued; each PRDGap round (open gaps, clean); architecture starting, each architect finishing, each redo round (n/2), reaching or passing gate 1, 2 or 3 (set `waiting_on: you`); the plan arriving (set `steps.total` = the number of Todo items, `wave.total` = the number of waves, from `plans/SPEC-NNN.md`); a wave starting; a lane taking or finishing a unit; a lane's round changing (the tester reports it); a **plan step completing** (the tester's unit-complete message lists the step numbers; add them to `steps.done` and report `step N/P`); a WaveMerger merge, with conflicts if any; verification starting and its result; a gap cycle (n/2); the PR opening (URL); any lane or researcher blocked or failed, or an escalation to the user; a research request changing stage, a ResearchJudge round, and its artifact being ready.
+
+Set `waiting_on` and `waiting_for` whenever the PRD is waiting, so the dashboard's "Needs you" section is accurate. After a context compaction, re-run the renderer first.
 
 ## Watching
 Start `python3 <skill dir>/scripts/watch-dir.py prds .agentic-team/seen.txt PRD edits` with the Monitor tool (`timeout_ms: 1800000`). It waits for a file to stop changing and prints `NEW_PRD <path>` once per new file and `MOD_PRD <path>` each time a seen PRD's content changes (with `edits` it polls every 2s). Re-arm it when it expires; nothing is lost.

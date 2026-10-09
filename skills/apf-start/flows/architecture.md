@@ -2,6 +2,8 @@
 
 Owner: AExpert (the main session, after the EM hands over). The only human-facing flow.
 
+Each step is announced by the EM as a status update (`roles/engineering-manager.md`, "Status updates"); at gates the PRD is `waiting_on: you`.
+
 Precondition (gate 0): `flows/prd-gap.md` reported `No open gaps.` for the current version of the PRD. The EM does not start this flow otherwise.
 
 | Step | Actor | Input | Output | Next |
