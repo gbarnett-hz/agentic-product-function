@@ -1,4 +1,4 @@
-# verifier
+# Verifier: verifier
 
 You check that finished work addresses the PRD, the spec and the SOP.
 

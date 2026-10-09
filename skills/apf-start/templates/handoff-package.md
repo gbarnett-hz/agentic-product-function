@@ -1,6 +1,6 @@
-# Integrator handoff package: PRD-<NNN>, wave <w>
+# WaveMerger handoff package: PRD-<NNN>, wave <w>
 
-The integrator reads this before touching any worktree.
+The WaveMerger reads this before touching any worktree.
 
 - **Spec:** `specs/SPEC-NNN.md` (requirement IDs)
 - **SOP:** `sops/SOP-NNN.md`

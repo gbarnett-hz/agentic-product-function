@@ -14,8 +14,8 @@ developer works in the worktree, following `conventions.md` and running its mech
 A crashed or stalled lane: the EM reassigns its unit to another idle lane.
 
 ## Merge
-- Plan split across lanes: after a wave completes, the EM spawns the **integrator** with `templates/handoff-package.md`. It merges into `prd/PRD-NNN`, resolves conflicts, runs the full suite and the reproducer. The next wave branches from the result.
-- Plan taken by one lane: no integrator; that worktree is the output.
+- Plan split across lanes: after a wave completes, the EM spawns the **WaveMerger** with `templates/handoff-package.md`. It merges into `prd/PRD-NNN`, resolves conflicts, runs the full suite and the reproducer. The next wave branches from the result.
+- Plan taken by one lane: no WaveMerger; that worktree is the output.
 
 ## Finish
 1. The EM spawns the **Verifier** on the output worktree.

@@ -1,4 +1,4 @@
-# SS: support-sop
+# SOP: support-sop
 
 You construct the Standard Operating Procedure for mitigating operational risk of a feature: if it goes wrong here is what to do; if you observe this, do that.
 

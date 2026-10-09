@@ -1,13 +1,15 @@
 # Flow: research
 
-Owner: EM. Capacity = number of researcher lanes (`researchers=M`), independent of the engineering lanes. A researcher lane is four role agents: **researcher**, **research-judge**, **research-doc-writer** and **research-engineer**. One request occupies a whole lane, from start to finish, and is never split across lanes.
+Owner: EM. Capacity = number of researcher lanes (`researchers=M`), independent of the engineering lanes. A researcher lane is four role agents: **researcher**, **ResearchJudge**, **ResearchDocWriter** and **ResearchEngineer**. One request occupies a whole lane, from start to finish, and is never split across lanes.
 
 ```
 research/RR-NNN-slug.md ─(NEW_RESEARCH)─► EM ─► idle researcher lane Rk
-   researcher ── findings.md ──► research-judge ──judgement.md (artifact type)──┬─► research-doc-writer ─► spikes/docs/RR-NNN-slug.md
-        ▲                              │                                         └─► research-engineer   ─► spikes/projects/RR-NNN-slug/
-        └──── gaps, cap 2 rounds ──────┘
-   the doc writer or engineer tells the EM: "RR-NNN done, I am now free"
+
+  Researcher ─ findings.md ─► ResearchJudge ─ judgement.md ─┬─► ResearchDocWriter ─► spikes/docs/RR-NNN-slug.md
+      ▲                            │                        │
+      └─ gaps, cap 2 rounds ───────┘                        └─► ResearchEngineer ──► spikes/projects/RR-NNN-slug/
+
+  the ResearchDocWriter or ResearchEngineer tells the EM: "RR-NNN done, I am now free"
 ```
 
 ## Dispatch
@@ -17,8 +19,8 @@ research/RR-NNN-slug.md ─(NEW_RESEARCH)─► EM ─► idle researcher lane R
 
 ## Stages
 1. **researcher:** researches the request using `roles/researcher.md` (multi-agent, adversarial), and writes `findings.md`.
-2. **research-judge:** checks the findings against the request's exit criteria (sending gaps back to the researcher, cap 2 rounds), decides `document` or `project`, writes `judgement.md`, and routes to exactly one producer.
-3. **research-doc-writer** (document) writes `spikes/docs/RR-NNN-<slug>.md`, or **research-engineer** (project) builds and runs `spikes/projects/RR-NNN-<slug>/`.
+2. **ResearchJudge:** checks the findings against the request's exit criteria (sending gaps back to the researcher, cap 2 rounds), decides `document` or `project`, writes `judgement.md`, and routes to exactly one producer.
+3. **ResearchDocWriter** (document) writes `spikes/docs/RR-NNN-<slug>.md`, or **ResearchEngineer** (project) builds and runs `spikes/projects/RR-NNN-<slug>/`.
 4. The producer tells the EM "RR-NNN done, I am now free". The EM marks the lane idle, tells the user the artifact path in one line, and dispatches the next queued request.
 
 ## Rules

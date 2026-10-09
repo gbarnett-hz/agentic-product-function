@@ -41,7 +41,7 @@ The request closes when all of these hold. Refer to question IDs.
 - [ ] <request-specific criteria>
 
 ## 7. Deliverable
-`document` / `project` / `judge decides` (default). Format constraints or must-haves, if any.
+`document` / `project` / `ResearchJudge decides` (default). Format constraints or must-haves, if any.
 
 ## 8. Constraints
 Hard constraints (HC-n from `product-guiding-principles.md`) that the investigation or any prototype must respect, and anything else (environment, budget, confidentiality).

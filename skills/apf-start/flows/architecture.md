@@ -11,7 +11,7 @@ Owner: AExpert (the main session, after the EM hands over). The only human-facin
 | 5 | **Gate 1** (human) | `templates/option-table.md` | chosen option | AExpert |
 | 6 | AExpert | chosen option | `drafts/SPEC-NNN.md` | gate 2 |
 | 7 | **Gate 2** (human) | draft spec | approval or changes (loop to 6) | `specs/SPEC-NNN.md` |
-| 8 | SS | approved spec | `drafts/SOP-NNN.md` (+ gaps) | gate 3 |
+| 8 | SOP | approved spec | `drafts/SOP-NNN.md` (+ gaps) | gate 3 |
 | 9 | **Gate 3** (human) | draft SOP | approval, or scoped re-run of the architecture flow (fresh 2-round cap) | `sops/SOP-NNN.md` |
 | 10 | AExpert | spec AND SOP approved | `plans/SPEC-NNN.md` (apf-plan, parallel by default) | EM |
 

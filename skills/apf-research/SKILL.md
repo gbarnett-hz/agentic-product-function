@@ -23,7 +23,7 @@ Ask in small batches (`AskUserQuestion` for choices, plain questions for open an
 5. Sources to consult (repo, web, papers, industry standards, other) and any to exclude or distrust.
 6. Depth: `quick`, `standard` or `deep` (see the template).
 7. Exit criteria: what must be true to close the request.
-8. Deliverable: a document, a project, or `judge decides`. Default to `judge decides`.
+8. Deliverable: a document, a project, or `ResearchJudge decides`. Default to `ResearchJudge decides`.
 9. Constraints: hard constraints (HC-n) the investigation or any prototype must respect, and anything else.
 
 Rules while interviewing:

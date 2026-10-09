@@ -29,7 +29,7 @@ If `researchers` ≥ 1, start a second watcher the same way: `python3 <skill dir
 
 ## Research dispatch (see `flows/research.md`)
 - Researcher capacity is the number of researcher lanes (`researchers=M`), separate from the engineering lanes. A request occupies one lane from start to finish and is never split.
-- Assign a request only to an **idle** researcher lane; otherwise queue it. When a lane's producer (doc writer or engineer) reports "RR-NNN done, I am now free", mark the lane idle, tell the user the artifact path in one line, and dispatch the next queued request.
+- Assign a request only to an **idle** researcher lane; otherwise queue it. When a lane's producer (ResearchDocWriter or ResearchEngineer) reports "RR-NNN done, I am now free", mark the lane idle, tell the user the artifact path in one line, and dispatch the next queued request.
 - A crashed or stalled researcher lane: reassign its request to another idle lane.
 
 ## Finishing

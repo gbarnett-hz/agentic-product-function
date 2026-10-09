@@ -24,7 +24,7 @@ If ACore created or changed `conventions.md`, show the user that diff here too (
 Write the draft to `drafts/SPEC-NNN.md` using `templates/spec.md` exactly. Requirement IDs must be unique and traceable to PRD requirement IDs. Show it to the user. Edit the draft in place for requested changes. On approval move it to `specs/SPEC-NNN.md` (status: Approved).
 
 ## 6. SOP (gate 3)
-Send the approved spec to **SS** (`roles/support-sop.md`). Show its draft SOP (`drafts/SOP-NNN.md`) to the user. If SS reports gaps in the spec's operational hooks, fix the spec (re-approval of the delta) before continuing.
+Send the approved spec to **SOP** (`roles/support-sop.md`). Show its draft SOP (`drafts/SOP-NNN.md`) to the user. If SOP reports gaps in the spec's operational hooks, fix the spec (re-approval of the delta) before continuing.
 
 If the user wants parts of the SOP addressed, re-run the architecture flow **scoped to exactly what was asked**, with a fresh 2-round cap. If the spec changes, it needs re-approval (the delta only). On approval write the SOP to `sops/SOP-NNN.md`.
 

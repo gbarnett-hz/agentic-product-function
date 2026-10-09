@@ -1,11 +1,11 @@
 ---
 name: apf-start
-description: Run a product function as a team of agents. An engineering manager watches prds/ for new PRDs, an architect team (AExpert, ACore, ACloud, ASolution) assesses each one, you approve an option, then a spec and an SOP at three human gates, and a fixed pool of developer+tester lanes builds the plan in git worktrees, verifies it against the PRD, spec and SOP, and opens a PR with gh. Use when the user says "apf-start", "start the product team", or wants PRDs dropped into a folder to be assessed, specified and built by an agent team. Also runs a team of researchers. The research/ directory is watched too, and each research request is taken by one researcher lane (researcher, judge, doc writer, engineer) and closed with a spike in spikes/. Takes lanes=N researchers=M.
+description: Run a product function as a team of agents. An engineering manager watches prds/ for new PRDs, an architect team (AExpert, ACore, ACloud, ASolution) assesses each one, you approve an option, then a spec and an SOP at three human gates, and a fixed pool of developer+tester lanes builds the plan in git worktrees, verifies it against the PRD, spec and SOP, and opens a PR with gh. Use when the user says "apf-start", "start the product team", or wants PRDs dropped into a folder to be assessed, specified and built by an agent team. Also runs a team of researchers. The research/ directory is watched too, and each research request is taken by one researcher lane (researcher, the ResearchJudge, ResearchDocWriter, engineer) and closed with a spike in spikes/. Takes lanes=N researchers=M.
 ---
 
 # apf-start
 
-Invocation: `/apf-start lanes=N researchers=M`. N engineering lanes (each a developer paired with a tester) and M researcher lanes (each a researcher, research-judge, research-doc-writer and research-engineer) are fixed for the session. `researchers=0` turns the research function off.
+Invocation: `/apf-start lanes=N researchers=M`. N engineering lanes (each a developer paired with a tester) and M researcher lanes (each a researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer) are fixed for the session. `researchers=0` turns the research function off.
 
 You are the **EM** (main session). Read `roles/engineering-manager.md` and follow it. When a PRD lands, you hand over to **AExpert** (`roles/architect-chief.md`), a role you play, and run `flows/architecture.md`. Then run `flows/engineering.md`, and `flows/requirement-gap.md` when the Verifier reports gaps. When a research request lands in `research/`, run `flows/research.md`. The complete picture and rules are in `README.md`.
 
@@ -18,6 +18,9 @@ You are the **EM** (main session). Read `roles/engineering-manager.md` and follo
 3. Write `.agentic-team/state.json` with N idle lanes and M idle researcher lanes (shape in `roles/engineering-manager.md`).
 4. Arm the PRD watcher with Monitor: `python3 <skill dir>/scripts/watch-dir.py prds .agentic-team/seen.txt PRD`.
 5. If M ≥ 1, arm the research watcher with a second Monitor: `python3 <skill dir>/scripts/watch-dir.py research .agentic-team/seen-research.txt RESEARCH`.
+
+## Naming running agents
+Every subagent you spawn gets a `description` that starts with its label in brackets, then the PRD or request and the unit, so the agent list shows who is doing what: `[ACore] PRD-001 design`, `[Developer-2] PRD-001 unit 3`, `[Tester-2] PRD-001 unit 3`, `[WaveMerger] PRD-001 wave 1`, `[Verifier] PRD-001 verify`, `[SOP] PRD-001 SOP`, `[Researcher-1] RR-004 angle: pricing`, `[ResearchJudge] RR-004 the ResearchJudge`. Labels: `AExpert`, `ACore`, `ACloud`, `ASolution`, `SOP`, `Developer-<lane>`, `Tester-<lane>`, `WaveMerger` (WaveMerger), `Verifier`, `Researcher-<lane>`, `ResearchJudge`, `ResearchDocWriter`, `ResearchEngineer`. The EM and AExpert are the main session. Where an agent can be given a name to message it by, use the same label.
 
 ## Dependencies
 - Vendored in `vendor/` (read by path, not installed as separate skills): `apf-deep-code`, `apf-group-design`, `apf-plan` (adapted).

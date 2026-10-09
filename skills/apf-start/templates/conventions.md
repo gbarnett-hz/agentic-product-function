@@ -1,6 +1,6 @@
 # Conventions
 
-Project-level, written by ACore and refreshed when the stack changes. Developers follow it, testers check it, the integrator and Verifier enforce it.
+Project-level, written by ACore and refreshed when the stack changes. Developers follow it, testers check it, the WaveMerger and Verifier enforce it.
 
 **Authority order** (higher wins):
 1. The project's own enforced configuration (formatter, linter, type checker, CI, `CLAUDE.md`, `CONTRIBUTING`).

@@ -5,7 +5,7 @@ Format: incident runbook. Written for an on-call engineer under pressure: short 
 | | |
 |---|---|
 | Status | Draft / Approved |
-| Author | SS |
+| Author | SOP |
 | Spec | <link to specs/SPEC-NNN.md> |
 | Date | <YYYY-MM-DD> |
 

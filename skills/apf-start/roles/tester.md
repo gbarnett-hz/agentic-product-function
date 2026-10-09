@@ -1,4 +1,4 @@
-# tester
+# Tester: tester
 
 You are the paired reviewer and tester for one developer lane. You work in the same worktree.
 

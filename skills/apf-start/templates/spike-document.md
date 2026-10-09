@@ -31,7 +31,7 @@ Evidence against the conclusion, source-quality and bias concerns, and how each 
 Each criterion from the request, met or not, with evidence.
 
 ## 7. Limitations and open questions
-What this spike could not establish, assumptions made, and gaps the judge listed.
+What this spike could not establish, assumptions made, and gaps the ResearchJudge listed.
 
 ## 8. Follow-ups
 Suggested next steps, including out-of-scope discoveries. Suggestions, not decisions.

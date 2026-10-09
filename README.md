@@ -23,33 +23,37 @@ Organisation (grouping only, no flows; the flows are below):
 ╚══════════════════════════════════════════════════════════════════════════╝
 ╔═ architecture ═══════════════════════════════════════════════════════════╗
 ║                     ┌──────────────────────────────┐                     ║
-║                     │  architect-chief [AExpert]   │                     ║
+║                     │       architect-chief        │                     ║
+║                     │          [AExpert]           │                     ║
 ║                     └──────────────────────────────┘                     ║
 ║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
 ║ │    architect-core   │ │   architect-cloud   │ │  architect-solution │  ║
+║ │       [ACore]       │ │       [ACloud]      │ │     [ASolution]     │  ║
 ║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
 ║                         ┌─────────────────────┐                          ║
-║                         │   support-sop [SS]  │                          ║
+║                         │     support-sop     │                          ║
+║                         │        [SOP]        │                          ║
 ║                         └─────────────────────┘                          ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 ╔═ engineering (lane = developer + tester) ════════════════════════════════╗
 ║                     ┌──────────────────────────────┐                     ║
-║                     │   engineering-manager [EM]   │                     ║
+║                     │     engineering-manager      │                     ║
+║                     │             [EM]             │                     ║
 ║                     └──────────────────────────────┘                     ║
 ║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
-║ │     developer-1     │ │     developer-2     │ │     developer-N     │  ║
-║ │       tester-1      │ │       tester-2      │ │       tester-N      │  ║
+║ │     Developer-1     │ │     Developer-2     │ │     Developer-N     │  ║
+║ │       Tester-1      │ │       Tester-2      │ │       Tester-N      │  ║
 ║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
 ║ ┌─────────────────────┐ ┌─────────────────────┐                          ║
-║ │      integrator     │ │       verifier      │                          ║
+║ │      WaveMerger     │ │       Verifier      │                          ║
 ║ └─────────────────────┘ └─────────────────────┘                          ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 ╔═ research ═══════════════════════════════════════════════════════════════╗
 ║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
-║ │     researcher-1    │ │     researcher-M    │ │    research-judge   │  ║
+║ │     Researcher-1    │ │     Researcher-M    │ │    ResearchJudge    │  ║
 ║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
 ║ ┌─────────────────────┐ ┌─────────────────────┐                          ║
-║ │ research-doc-writer │ │  research-engineer  │                          ║
+║ │  ResearchDocWriter  │ │   ResearchEngineer  │                          ║
 ║ └─────────────────────┘ └─────────────────────┘                          ║
 ╚══════════════════════════════════════════════════════════════════════════╝
                                                                    ╔═══════╗
@@ -138,7 +142,7 @@ From here on the team uses them: architects rule out or flag options that violat
 ```
 /apf-start lanes=3 researchers=2
 ```
-This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` (and, when researchers ≥ 1, `research/ spikes/docs/ spikes/projects/`) if missing, writes `.agentic-team/state.json` with 3 idle engineering lanes and 2 idle researcher lanes, and arms the watchers for `prds/` and `research/`. 3 lanes means 3 developers, each paired with a tester. 2 researchers means 2 researcher lanes, each with its own researcher, judge, doc writer and research engineer. Capacity is fixed for the session; `researchers=0` turns research off.
+This session becomes the **EM**. It creates `prds/ specs/ sops/ plans/ drafts/ .agentic-team/` (and, when researchers ≥ 1, `research/ spikes/docs/ spikes/projects/`) if missing, writes `.agentic-team/state.json` with 3 idle engineering lanes and 2 idle researcher lanes, and arms the watchers for `prds/` and `research/`. 3 lanes means 3 developers, each paired with a tester. 2 researchers means 2 researcher lanes, each with its own researcher, the ResearchJudge, ResearchDocWriter and ResearchEngineer. Capacity is fixed for the session; `researchers=0` turns research off.
 
 Start the EM *before* writing the PRD. The watchers treat any PRD or research request that already exists when they first start as already seen.
 
@@ -167,7 +171,7 @@ If `conventions.md` is new or changed, AExpert shows it first so you can correct
 AExpert writes `drafts/SPEC-001.md` in the fixed spec template and shows it to you. Ask for changes in plain language; it edits the draft in place. Every requirement has an ID (`R-1`...) linked to your `PR-n`. When you approve, it moves to `specs/SPEC-001.md`.
 
 ### 7. Gate 3: approve the SOP
-SS builds `drafts/SOP-001.md` from the approved spec: one runbook scenario per risk ("if you see X, do Y, roll back with Z"). If a risk has no usable monitoring signal, the SOP records a gap and AExpert fixes the spec first (you re-approve that part).
+SOP builds `drafts/SOP-001.md` from the approved spec: one runbook scenario per risk ("if you see X, do Y, roll back with Z"). If a risk has no usable monitoring signal, the SOP records a gap and AExpert fixes the spec first (you re-approve that part).
 
 If you want something in the SOP addressed, say so. AExpert re-runs the architecture flow, scoped to exactly what you asked, and a spec change needs your re-approval of the delta.
 
@@ -180,7 +184,7 @@ AExpert runs `apf-plan` on the approved spec and SOP: test-first steps grouped i
 The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are busy, units queue. For each unit:
 - A worktree is created; the developer works in it following `conventions.md`, runs the format, lint and type checks until clean, and sends the result to its paired tester, who re-runs the checks and reviews idiom.
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
-- A wave must be merged before the next wave starts. If a plan is split across lanes, the **integrator** merges the lane worktrees into `prd/PRD-001` and runs the full suite and the reproducer. A plan taken by one lane needs no merge.
+- A wave must be merged before the next wave starts. If a plan is split across lanes, the **WaveMerger** merges the lane worktrees into `prd/PRD-001` and runs the full suite and the reproducer. A plan taken by one lane needs no merge.
 
 Check progress any time:
 ```
@@ -199,11 +203,11 @@ Just run `/apf-create-prd` again. PRDs run through architecture one at a time (t
 ```
 /apf-research
 ```
-The skill interviews you and writes a research request in the fixed template: objective, specific research questions (`Q-1`...), context, scope, sources to consult, depth (`quick` / `standard` / `deep`), exit criteria, deliverable (`document`, `project` or `judge decides`) and constraints. When you approve, it writes `research/RR-001-<slug>.md`, which the EM picks up.
+The skill interviews you and writes a research request in the fixed template: objective, specific research questions (`Q-1`...), context, scope, sources to consult, depth (`quick` / `standard` / `deep`), exit criteria, deliverable (`document`, `project` or `ResearchJudge decides`) and constraints. When you approve, it writes `research/RR-001-<slug>.md`, which the EM picks up.
 
-An idle researcher lane takes the whole request. Its **researcher** investigates with several angle agents in parallel (repo, web, papers, standards, prior art, and always adversarial ones that try to disprove the leading conclusions), then hands the findings to the lane's **research judge**. The judge checks them against your exit criteria (sending gaps back, at most 2 rounds), decides the artifact type, and routes to exactly one producer:
-- a **research doc writer** writes `spikes/docs/RR-001-<slug>.md`, or
-- a **research engineer** builds and runs `spikes/projects/RR-001-<slug>/`.
+An idle researcher lane takes the whole request. Its **researcher** investigates with several angle agents in parallel (repo, web, papers, standards, prior art, and always adversarial ones that try to disprove the leading conclusions), then hands the findings to the lane's **research the ResearchJudge**. The ResearchJudge checks them against your exit criteria (sending gaps back, at most 2 rounds), decides the artifact type, and routes to exactly one producer:
+- a **ResearchDocWriter** writes `spikes/docs/RR-001-<slug>.md`, or
+- a **ResearchEngineer** builds and runs `spikes/projects/RR-001-<slug>/`.
 
 The EM tells you the artifact path when the lane is free again. There is no human gate: read the spike and decide. Architects and `/apf-create-prd` read `spikes/` as context for later work. Spikes are left uncommitted in your working tree.
 
@@ -231,15 +235,15 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the PRD, then `apf-group-design` to formulate candidate designs. |
 | **ACloud** (architect-cloud) | ACore's output + `deep-research`: side effects on cloud deployment. |
 | **ASolution** (architect-solution) | ACore's output + `deep-research`: the PRD in enterprise deployments with existing services. |
-| **SS** (support-sop) | Builds the SOP from the approved spec. |
-| **Lane** (developer-i + test-i) | A developer paired with a tester. N lanes, set at invocation. Each unit of work is isolated in a git worktree. |
-| **Integrator** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
+| **SOP** (support-sop) | Builds the SOP from the approved spec. |
+| **Lane** (Developer-i + Tester-i) | A developer paired with a tester. N lanes, set at invocation. Each unit of work is isolated in a git worktree. |
+| **WaveMerger** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
 | **Verifier** | Checks finished work against the PRD, spec requirement IDs and SOP. Produces a gap report. |
-| **Researcher lane** (researcher + research-judge + research-doc-writer + research-engineer) | M lanes, set at invocation (`researchers=M`). A lane takes one research request in its entirety. |
-| **researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `apf-deep-code`): repo, web, papers, standards, prior art. Writes findings. |
-| **research-judge** | Checks the findings against the exit criteria (gaps go back to the researcher, cap 2), decides the artifact type (`document` or `project`) and routes to one producer. |
-| **research-doc-writer** | Writes the spike document to `spikes/docs/`. |
-| **research-engineer** | Builds and runs the spike project in `spikes/projects/`. |
+| **Researcher lane** (Researcher + ResearchJudge + ResearchDocWriter + ResearchEngineer) | M lanes, set at invocation (`researchers=M`). A lane takes one research request in its entirety. |
+| **Researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `apf-deep-code`): repo, web, papers, standards, prior art. Writes findings. |
+| **ResearchJudge** | Checks the findings against the exit criteria (gaps go back to the researcher, cap 2), decides the artifact type (`document` or `project`) and routes to one producer. |
+| **ResearchDocWriter** | Writes the spike document to `spikes/docs/`. |
+| **ResearchEngineer** | Builds and runs the spike project in `spikes/projects/`. |
 
 ---
 
@@ -250,28 +254,28 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | PRD draft | `drafts/PRD-NNN.md` | `apf-create-prd` | YOU | `apf-create-prd/templates/prd.md` |
 | PRD | `prds/PRD-NNN-<slug>.md` | `apf-create-prd` (on your go-ahead) | watcher → EM, AExpert, ACore, ACloud, ASolution, Verifier | `apf-create-prd/templates/prd.md` |
 | Product vision | `product-vision.md` (project root) | `apf-product-foundations` | apf-create-prd, AExpert, architects, Verifier | `apf-product-foundations/templates/product-vision.md` |
-| Guiding principles | `product-guiding-principles.md` (HC-n hard constraints, P-n principles) | `apf-product-foundations` | apf-create-prd, AExpert, architects, SS, developers, testers, Verifier | `apf-product-foundations/templates/product-guiding-principles.md` |
-| Company context | `company-context.md` | `apf-product-foundations` | apf-create-prd, AExpert, ACloud, ASolution, SS | `apf-product-foundations/templates/company-context.md` |
+| Guiding principles | `product-guiding-principles.md` (HC-n hard constraints, P-n principles) | `apf-product-foundations` | apf-create-prd, AExpert, architects, SOP, developers, testers, Verifier | `apf-product-foundations/templates/product-guiding-principles.md` |
+| Company context | `company-context.md` | `apf-product-foundations` | apf-create-prd, AExpert, ACloud, ASolution, SOP | `apf-product-foundations/templates/company-context.md` |
 | Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `apf-product-foundations` | every agent in the project | none |
 | Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | apf-create-prd, AExpert, architects | none |
-| Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
+| Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, WaveMerger, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
 | Option table (gate 1) | shown to you | AExpert | YOU | `templates/option-table.md` |
-| Spec draft | `drafts/SPEC-NNN.md` | AExpert | YOU, SS | `templates/spec.md` |
-| Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SS, `apf-plan`, lanes, integrator, Verifier | `templates/spec.md` |
-| SOP draft | `drafts/SOP-NNN.md` | SS | YOU, AExpert | `templates/sop.md` |
-| SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `apf-plan`, lanes, integrator, Verifier | `templates/sop.md` |
-| Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `apf-plan` | EM, lanes, integrator | `vendor/apf-plan` |
+| Spec draft | `drafts/SPEC-NNN.md` | AExpert | YOU, SOP | `templates/spec.md` |
+| Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SOP, `apf-plan`, lanes, WaveMerger, Verifier | `templates/spec.md` |
+| SOP draft | `drafts/SOP-NNN.md` | SOP | YOU, AExpert | `templates/sop.md` |
+| SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `apf-plan`, lanes, WaveMerger, Verifier | `templates/sop.md` |
+| Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `apf-plan` | EM, lanes, WaveMerger | `vendor/apf-plan` |
 | Research request draft | `drafts/RR-NNN.md` | `apf-research` | YOU | `research/templates/research-request.md` |
-| Research request | `research/RR-NNN-<slug>.md` | `apf-research` (on your go-ahead) | watcher → EM, researcher, research-judge | `research/templates/research-request.md` |
-| Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, research-judge | research-judge, doc writer, engineer | none |
-| Spike document | `spikes/docs/RR-NNN-<slug>.md` | research-doc-writer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-document.md` |
-| Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | research-engineer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-project-readme.md` |
+| Research request | `research/RR-NNN-<slug>.md` | `apf-research` (on your go-ahead) | watcher → EM, researcher, ResearchJudge | `research/templates/research-request.md` |
+| Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, ResearchJudge | ResearchJudge, ResearchDocWriter, ResearchEngineer | none |
+| Spike document | `spikes/docs/RR-NNN-<slug>.md` | ResearchDocWriter | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-document.md` |
+| Spike project | `spikes/projects/RR-NNN-<slug>/` (README + code) | ResearchEngineer | YOU, architects, `apf-create-prd`, `apf-research` | `templates/spike-project-readme.md` |
 | Orchestration state | `.agentic-team/state.json`, `.agentic-team/seen.txt`, `.agentic-team/seen-research.txt` | EM only | EM | `roles/engineering-manager.md` |
-| Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | integrator, Verifier | none |
-| Handoff package | in the integrator's prompt | EM | integrator | `templates/handoff-package.md` |
-| Integration branch | `prd/PRD-NNN` | integrator | Verifier, EM | git |
+| Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | WaveMerger, Verifier | none |
+| Handoff package | in the WaveMerger's prompt | EM | WaveMerger | `templates/handoff-package.md` |
+| Integration branch | `prd/PRD-NNN` | WaveMerger | Verifier, EM | git |
 | Gap report | EM's message to AExpert | Verifier | EM, AExpert | `templates/gap-report.md` |
 | Pull request | GitHub | EM (`gh pr create`) | YOU | `templates/pr-description.md` |
 
@@ -292,7 +296,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | 5 | **Gate 1** (you) | option table | chosen option |
 | 6 | AExpert | chosen option | `drafts/SPEC-NNN.md` |
 | 7 | **Gate 2** (you) | draft spec | approval, or changes (loop to 6) → `specs/` |
-| 8 | SS | approved spec | `drafts/SOP-NNN.md` (+ gaps) |
+| 8 | SOP | approved spec | `drafts/SOP-NNN.md` (+ gaps) |
 | 9 | **Gate 3** (you) | draft SOP | approval → `sops/`, or a scoped re-run of the architecture flow (fresh 2-round cap) |
 | 10 | AExpert | spec AND SOP approved | `plans/SPEC-NNN.md` → EM |
 
@@ -304,10 +308,10 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 2. Each unit gets a worktree. The lane's developer and tester receive the spec, the SOP, the whole plan (global context) and their unit (local context).
 3. developer → tester → comments → developer, **cap 3 rounds**, then escalate to the EM, then you. The tester declares the unit complete and tells the EM "I am done, I am now free".
 4. A crashed or stalled lane: the EM reassigns its unit to another idle lane.
-5. Plan split across lanes: after each wave the **integrator** merges into `prd/PRD-NNN` (next wave branches from it). Plan taken by a single lane: no merge.
+5. Plan split across lanes: after each wave the **WaveMerger** merges into `prd/PRD-NNN` (next wave branches from it). Plan taken by a single lane: no merge.
 6. The **Verifier** checks the output. `CONFORMS` → the EM pushes and opens the PR. Gaps → Requirement Gap.
 
-**Integrator handoff package:** spec, SOP, whole plan, ordering constraints, base commit SHA, each unit's file ownership and requirement IDs, each lane's diff and report (what changed, why, interfaces touched, tests added). After a merge it runs the full suite and the plan's reproducer. An unresolvable conflict goes back to the owning lane with the hunk, both sides and the context (cap 3), then to the EM, then to you.
+**WaveMerger handoff package:** spec, SOP, whole plan, ordering constraints, base commit SHA, each unit's file ownership and requirement IDs, each lane's diff and report (what changed, why, interfaces touched, tests added). After a merge it runs the full suite and the plan's reproducer. An unresolvable conflict goes back to the owning lane with the hunk, both sides and the context (cap 3), then to the EM, then to you.
 
 **Pull request:** always GitHub, always `gh`, always described: summary, PRD and spec IDs, requirement table (where implemented and tested), SOP link and Verifier result, test results, risks and gap cycles, and the Claude Code attribution line.
 
@@ -321,13 +325,13 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 
 ### Research (owner: EM)
 
-A researcher lane is four role agents: researcher, research-judge, research-doc-writer and research-engineer. `researchers=M` gives M lanes. One request occupies one lane from start to finish; it is never split across lanes.
+A researcher lane is four role agents: researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer. `researchers=M` gives M lanes. One request occupies one lane from start to finish; it is never split across lanes.
 
 1. The EM's second watcher prints `NEW_RESEARCH <path>`; the EM queues the request.
 2. The EM assigns it to an **idle** researcher lane only; no idle lane means it queues. Researcher capacity is separate from the engineering lanes.
 3. **researcher:** runs parallel angle agents (repo, history, tests, web, papers, standards, prior art, empirical evidence) plus adversarial angles (counter-evidence, source quality and bias, and at `deep` an independent re-derivation). Reconciles into `findings.md` with an answer, confidence and citations per question, counter-evidence, limitations and an exit-criteria check.
-4. **research-judge:** checks the findings against the exit criteria (gaps back to the researcher, **cap 2 rounds**), then decides `document` or `project` (a project when closing the request needs executable evidence such as a benchmark, proof of concept or reproduction), writes `judgement.md` and routes to exactly one producer.
-5. **research-doc-writer** writes `spikes/docs/RR-NNN-<slug>.md`, or **research-engineer** builds and runs `spikes/projects/RR-NNN-<slug>/` and records observed results in its README.
+4. **ResearchJudge:** checks the findings against the exit criteria (gaps back to the researcher, **cap 2 rounds**), then decides `document` or `project` (a project when closing the request needs executable evidence such as a benchmark, proof of concept or reproduction), writes `judgement.md` and routes to exactly one producer.
+5. **ResearchDocWriter** writes `spikes/docs/RR-NNN-<slug>.md`, or **ResearchEngineer** builds and runs `spikes/projects/RR-NNN-<slug>/` and records observed results in its README.
 6. The producer tells the EM "RR-NNN done, I am now free"; the EM frees the lane, tells you the artifact path and dispatches the next queued request.
 
 No human gate: ambiguity is recorded as an assumption and listed in the spike. Spikes recommend; you decide.
@@ -379,16 +383,16 @@ flowchart TD
     AE -->|"SPEC draft"| DRAFTS
     DRAFTS -->|"drafts/SPEC-NNN.md"| G2{{"Gate 2: YOU approve spec"}}
     G2 -->|"approved spec"| SPECS
-    SPECS -->|"specs/SPEC-NNN.md"| SS
-    SS -->|"SOP draft"| DRAFTS
+    SPECS -->|"specs/SPEC-NNN.md"| SOP
+    SOP -->|"SOP draft"| DRAFTS
     DRAFTS -->|"drafts/SOP-NNN.md"| G3{{"Gate 3: YOU approve SOP"}}
     G3 -->|"approved SOP"| SOPS
     SPECS -->|"spec (requirements, design)"| AE
     SOPS -->|"SOP (operational hooks)"| AE
     AE -->|"apf-plan: plans/SPEC-NNN.md, waves + deps"| PLANS
     PLANS -->|"plan"| EM
-    EM -->|"unit + spec + SOP + plan"| LANES["Lanes: developer-i + test-i,<br/>one worktree per unit"]
-    LANES -->|"lane report + branch"| INT[Integrator]
+    EM -->|"unit + spec + SOP + plan"| LANES["Lanes: Developer-i + Tester-i,<br/>one worktree per unit"]
+    LANES -->|"lane report + branch"| INT[WaveMerger]
     LANES -.->|"I am done, I am free"| EM
     INT -->|"prd/PRD-NNN merged worktree"| VER[Verifier]
     SPECS -->|"requirement IDs"| VER
@@ -411,7 +415,7 @@ flowchart TD
     AE -.->|"redo component, cap 2"| AS
     G2 -.->|"change requests"| AE
     G3 -.->|"scoped re-run request"| AE
-    SS -.->|"spec operational-hook gaps"| AE
+    SOP -.->|"spec operational-hook gaps"| AE
 ```
 
 ### Engineering detail (one wave)
@@ -420,13 +424,13 @@ flowchart TD
 flowchart TD
     PLAN[("plans/SPEC-NNN.md")] -->|"waves, units, ordering"| EM
     EM <-->|"lane states, queue"| STATE[(".agentic-team/state.json")]
-    EM -->|"unit + worktree, only if lane idle"| D["developer-i"]
-    EM -->|"same unit (global + local context)"| T["test-i"]
+    EM -->|"unit + worktree, only if lane idle"| D["Developer-i"]
+    EM -->|"same unit (global + local context)"| T["Tester-i"]
     D -->|"code in worktree"| T
     T -.->|"comments, cap 3 rounds"| D
     T -->|"unit complete + lane report"| EM
     T -->|"I am done, I am free"| EM
-    EM -->|"handoff-package.md"| INT[Integrator]
+    EM -->|"handoff-package.md"| INT[WaveMerger]
     D -->|"lane branch"| INT
     INT -.->|"conflict hunk + context, cap 3"| D
     INT -->|"prd/PRD-NNN"| TESTS{{"full suite + reproducer"}}
@@ -449,10 +453,10 @@ flowchart TD
     EM <-->|"researcher lane states, queue"| STATE[(".agentic-team/state.json")]
     EM -->|"request path, only if a researcher lane is idle"| RES[researcher]
     SRC[("repo, web, papers, standards, spikes/, foundations")] -->|"sources"| RES
-    RES -->|"findings.md: answers, citations, counter-evidence"| J[research-judge]
+    RES -->|"findings.md: answers, citations, counter-evidence"| J[ResearchJudge]
     J -.->|"gaps, cap 2 rounds"| RES
-    J -->|"judgement.md: document"| DW[research-doc-writer]
-    J -->|"judgement.md: project"| RE[research-engineer]
+    J -->|"judgement.md: document"| DW[ResearchDocWriter]
+    J -->|"judgement.md: project"| RE[ResearchEngineer]
     DW -->|"spikes/docs/RR-NNN-slug.md"| SPK
     RE -->|"spikes/projects/RR-NNN-slug/"| SPK
     DW -.->|"done, I am free"| EM
@@ -471,18 +475,18 @@ flowchart TD
 | Architecture redo loop | 2 rounds, then escalate to you |
 | Scoped re-run after you change the SOP | fresh 2-round cap |
 | Dev ↔ test loop | 3 rounds, then EM, then you |
-| Integrator conflict loop | 3 rounds, then EM, then you |
+| WaveMerger conflict loop | 3 rounds, then EM, then you |
 | Requirement Gap cycles | 2, then escalate to you |
 | Adversarial angles | chosen per PRD |
 | Gate to the EM | spec approved AND SOP approved |
 | Plan review | none, it goes straight to the EM |
 | Capacity | lanes only; no idle lane means no dispatch |
 | Researcher capacity | `researchers=M` lanes, separate from engineering lanes; one request per lane, never split; no idle lane means it queues |
-| Judge ↔ researcher loop | 2 rounds, then proceed with the gaps marked in the spike |
+| ResearchJudge ↔ researcher loop | 2 rounds, then proceed with the gaps marked in the spike |
 | Research human gate | none; assumptions and gaps are recorded in the spike |
 | Parallelism | by default, if the plan permits |
 | Idiom and conventions | `conventions.md` authority order: project's enforced config, then surrounding code, then the technology's community idiom (cited) |
-| Convention checks | developer runs format/lint/types before handoff; tester re-runs and reviews idiom; integrator re-runs after each merge; Verifier reports violations as gaps |
+| Convention checks | developer runs format/lint/types before handoff; tester re-runs and reviews idiom; WaveMerger re-runs after each merge; Verifier reports violations as gaps |
 | Done means | the work addresses the PRD, the spec, the SOP and the conventions |
 | Output | one branch and one GitHub PR per PRD; one spike per research request (`spikes/docs/` or `spikes/projects/`) |
 
@@ -519,7 +523,7 @@ skills/
     SKILL.md                               entry point: /apf-start lanes=N researchers=M
     roles/                                 engineering-manager, architect-chief, architect-core,
                                            architect-cloud, architect-solution, support-sop,
-                                           developer, tester, integrator, verifier,
+                                           developer, tester, wave-merger, verifier,
                                            researcher, research-judge, research-doc-writer,
                                            research-engineer
     flows/                                 architecture.md, engineering.md, requirement-gap.md,
