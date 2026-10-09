@@ -1,6 +1,6 @@
 ---
-name: action-plan
-description: Turn the current conversation into a detailed, actionable plan document — problem statement, background, design options with a reasoned selection, and an ordered, test-first todo list someone could execute without having read the chat. Two or more planner agents draft competing todo lists (reproducer first, TDD with integration tests, parallel waves), each is validated, and an arbiter agent picks the best and explains why. Use when the user says "action-plan", "turn this into a todo list", "write up a plan for this", "make this actionable", or wants the discussion so far captured as work to do. Works from the existing chat context; do not use at the start of a conversation with nothing to plan.
+name: apf-plan
+description: Turn the current conversation into a detailed, actionable plan document — problem statement, background, design options with a reasoned selection, and an ordered, test-first todo list someone could execute without having read the chat. Two or more planner agents draft competing todo lists (reproducer first, TDD with integration tests, parallel waves), each is validated, and an arbiter agent picks the best and explains why. Use when the user says "apf-plan", "turn this into a todo list", "write up a plan for this", "make this actionable", or wants the discussion so far captured as work to do. Works from the existing chat context; do not use at the start of a conversation with nothing to plan.
 ---
 
 # Action Plan
@@ -27,7 +27,7 @@ Do not re-litigate decisions the user already made — record them as decided, w
 
 ## 2. Verify and fill gaps
 
-For every file, symbol, or behaviour the plan will reference, confirm it exists and is as described (Grep/Read; `git log` for recent history if relevant). Fix stale claims silently in the plan. Keep this targeted — if the gaps are large enough to need broad research, say so and suggest `deep-code` or `group-design` instead of doing it here.
+For every file, symbol, or behaviour the plan will reference, confirm it exists and is as described (Grep/Read; `git log` for recent history if relevant). Fix stale claims silently in the plan. Keep this targeted — if the gaps are large enough to need broad research, say so and suggest `apf-deep-code` or `apf-group-design` instead of doing it here.
 
 ## 3. Design discussion and selection
 
@@ -123,7 +123,7 @@ Spawn **at least two** fresh `general-purpose` planner agents in one message so 
 
 Prompt for each:
 
-> Read the plan skeleton at `<plan path>` and the action-plan spec (the SKILL.md you were launched from: `<path to this action-plan/SKILL.md>`, resolved to the vendored copy under `vendor/action-plan/`) (section 4: the Todo, Parallel execution and Testing formats, and the Rules). Your strategy: `<strategy text>`. Using the codebase to confirm every reference, write a candidate containing only `## Todo`, `## Parallel execution` (leave Execution mode blank), and `## Testing` to `<plan path minus .md>.candidate-<A|B|C>.md`. Follow every Rule: reproducer first, "Confirm the objective" last, TDD gate per step, integration tests for cross-boundary steps, `file:line` citations, and wave analysis checked against the actual files. Do not edit the skeleton or any source files. Reply with the candidate path, step count, N, and widest wave.
+> Read the plan skeleton at `<plan path>` and the apf-plan spec (the SKILL.md you were launched from: `<path to this apf-plan/SKILL.md>`, resolved to the vendored copy under `vendor/apf-plan/`) (section 4: the Todo, Parallel execution and Testing formats, and the Rules). Your strategy: `<strategy text>`. Using the codebase to confirm every reference, write a candidate containing only `## Todo`, `## Parallel execution` (leave Execution mode blank), and `## Testing` to `<plan path minus .md>.candidate-<A|B|C>.md`. Follow every Rule: reproducer first, "Confirm the objective" last, TDD gate per step, integration tests for cross-boundary steps, `file:line` citations, and wave analysis checked against the actual files. Do not edit the skeleton or any source files. Reply with the candidate path, step count, N, and widest wave.
 
 ## 6. Validate each candidate
 

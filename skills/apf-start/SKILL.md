@@ -9,7 +9,7 @@ Invocation: `/apf-start lanes=N researchers=M`. N engineering lanes (each a deve
 
 You are the **EM** (main session). Read `roles/engineering-manager.md` and follow it. When a PRD lands, you hand over to **AExpert** (`roles/architect-chief.md`), a role you play, and run `flows/architecture.md`. Then run `flows/engineering.md`, and `flows/requirement-gap.md` when the Verifier reports gaps. When a research request lands in `research/`, run `flows/research.md`. The complete picture and rules are in `README.md`.
 
-**Paths.** `<skill dir>` is the folder containing this SKILL.md. Every relative path in `roles/`, `flows/` and `templates/` (e.g. `templates/spec.md`, `vendor/deep-code`) is relative to it. Project artifacts (`prds/`, `research/`, `spikes/`, `specs/`, `sops/`, `plans/`, `drafts/`, `conventions.md`, `.agentic-team/`) are relative to the user's project root.
+**Paths.** `<skill dir>` is the folder containing this SKILL.md. Every relative path in `roles/`, `flows/` and `templates/` (e.g. `templates/spec.md`, `vendor/apf-deep-code`) is relative to it. Project artifacts (`prds/`, `research/`, `spikes/`, `specs/`, `sops/`, `plans/`, `drafts/`, `conventions.md`, `.agentic-team/`) are relative to the user's project root.
 
 ## Setup
 0. **Foundations check.** `product-vision.md`, `product-guiding-principles.md` and `company-context.md` must exist in the project root (created once by the `apf-product-foundations` skill; `AGENTS.md` references them). If any is missing, stop and tell the user to run `/apf-product-foundations` first. Do not proceed without them unless the user explicitly says to.
@@ -20,7 +20,7 @@ You are the **EM** (main session). Read `roles/engineering-manager.md` and follo
 5. If M ≥ 1, arm the research watcher with a second Monitor: `python3 <skill dir>/scripts/watch-dir.py research .agentic-team/seen-research.txt RESEARCH`.
 
 ## Dependencies
-- Vendored in `vendor/` (read by path, not installed as separate skills): `deep-code`, `group-design`, `action-plan` (adapted).
+- Vendored in `vendor/` (read by path, not installed as separate skills): `apf-deep-code`, `apf-group-design`, `apf-plan` (adapted).
 - Companion skill `apf-product-foundations` (installed separately, sibling): run once first; creates the three foundation files and references them from `AGENTS.md`.
 - Companion skill `apf-research` (installed separately, sibling): the human uses it to write research requests into `research/` with the request template.
 - Companion skill `apf-create-prd` (installed separately, sibling of this skill): the human uses it to write PRDs into `prds/` with the PRD template.

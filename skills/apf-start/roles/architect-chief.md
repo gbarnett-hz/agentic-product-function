@@ -29,7 +29,7 @@ Send the approved spec to **SS** (`roles/support-sop.md`). Show its draft SOP (`
 If the user wants parts of the SOP addressed, re-run the architecture flow **scoped to exactly what was asked**, with a fresh 2-round cap. If the spec changes, it needs re-approval (the delta only). On approval write the SOP to `sops/SOP-NNN.md`.
 
 ## 7. Plan
-When both spec and SOP are approved, run the vendored `vendor/action-plan` (read its SKILL.md by path and follow it) in agentic-team mode: parallel by default, written to `plans/SPEC-NNN.md`. No human review of the plan. Hand it to the EM.
+When both spec and SOP are approved, run the vendored `vendor/apf-plan` (read its SKILL.md by path and follow it) in agentic-team mode: parallel by default, written to `plans/SPEC-NNN.md`. No human review of the plan. Hand it to the EM.
 
 ## 8. Requirement Gap
 Follow `flows/requirement-gap.md` when the EM sends you a gap report.

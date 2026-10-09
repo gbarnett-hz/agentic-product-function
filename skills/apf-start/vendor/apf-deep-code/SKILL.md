@@ -1,6 +1,6 @@
 ---
-name: deep-code
-description: Deep research into a specific area of a codebase, augmenting source-of-truth reading with web context (docs, specs, issues, blog posts, papers). Spawns multiple agents that each attack the target area from a different angle — implementation, history, tests, external docs/standards, prior art/alternatives — then reconciles their findings into one rigorously cited report. Use when the user asks to "deeply understand", "do deep research on", "deep-code", or "really dig into" a part of the codebase, especially when they want more than a summary of what the code does — they want why it's shaped that way, how it compares to the wider ecosystem, and what's not obvious from reading it alone. Do not use for quick lookups, single-file questions, or when a plain Explore/Read pass already answers the question.
+name: apf-deep-code
+description: Deep research into a specific area of a codebase, augmenting source-of-truth reading with web context (docs, specs, issues, blog posts, papers). Spawns multiple agents that each attack the target area from a different angle — implementation, history, tests, external docs/standards, prior art/alternatives — then reconciles their findings into one rigorously cited report. Use when the user asks to "deeply understand", "do deep research on", "apf-deep-code", or "really dig into" a part of the codebase, especially when they want more than a summary of what the code does — they want why it's shaped that way, how it compares to the wider ecosystem, and what's not obvious from reading it alone. Do not use for quick lookups, single-file questions, or when a plain Explore/Read pass already answers the question.
 ---
 
 # Deep Code

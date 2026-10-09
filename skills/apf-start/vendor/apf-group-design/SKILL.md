@@ -1,5 +1,5 @@
 ---
-name: group-design
+name: apf-group-design
 description: Turn one architectural objective into a short, ranked, fully-cited set of competing implementation approaches. Spawns 5+ subagents that each argue a genuinely different way to achieve the objective, then a final agent ranks them by risk, complexity, rolling-upgrade impact, and backwards compatibility. Use whenever the user wants an architecture/design decision explored from multiple angles rather than a single recommendation — phrases like "how should we approach X", "give me some design options for X", "what's the best way to build X", "group design", or "I need an architecture review before we commit to an approach". Every claim in every agent's output must cite a file:line or URL — do not use this for quick lookups, single-obvious-answer questions, or non-architectural coding tasks.
 ---
 

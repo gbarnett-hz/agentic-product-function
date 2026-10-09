@@ -58,7 +58,7 @@ npx skills remove apf-product-foundations apf-start apf-create-prd apf-research
 ```
 
 ### Notes
-- `deep-code`, `group-design` and `action-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
+- `apf-deep-code`, `apf-group-design` and `apf-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
 - Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill apf-product-foundations --skill apf-start --skill apf-create-prd --skill apf-research -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
 - Verified: `--list` and a non-interactive install of all four `apf-` skills from `gbarnett-hz/agentic-product-function` on GitHub put them in `./.claude/skills/` as copies, with their supporting folders (also verified from a local checkout). The installed skills have not been run (see [Known gaps](#known-gaps)).
@@ -109,7 +109,7 @@ It writes `drafts/PRD-001.md` and edits it with you. When you say it is ready, i
 
 ### 4. Architecture runs
 The EM flags the new PRD in one line and hands over to **AExpert** (you now talk to AExpert about architecture). Behind the scenes:
-1. ACore reads your codebase (`deep-code`), writes or refreshes `conventions.md` (your formatters, linters, patterns, and each technology's idiom), then proposes competing designs (`group-design`).
+1. ACore reads your codebase (`apf-deep-code`), writes or refreshes `conventions.md` (your formatters, linters, patterns, and each technology's idiom), then proposes competing designs (`apf-group-design`).
 2. ACloud and ASolution run in parallel on ACore's output (`deep-research`): cloud side effects, and fit in enterprise deployments.
 3. AExpert launches adversarial agents, chosen for this PRD (for example: "what breaks during a rolling upgrade?", "is every claim cited?"). It can send components back to the architects, at most 2 rounds.
 
@@ -131,7 +131,7 @@ If you want something in the SOP addressed, say so. AExpert re-runs the architec
 When both the spec and SOP are approved, the SOP moves to `sops/SOP-001.md`.
 
 ### 8. The plan (no review needed)
-AExpert runs `action-plan` on the approved spec and SOP: test-first steps grouped into waves, parallel by default. It writes `plans/SPEC-001.md` and hands it to the EM. You do not review this.
+AExpert runs `apf-plan` on the approved spec and SOP: test-first steps grouped into waves, parallel by default. It writes `plans/SPEC-001.md` and hands it to the EM. You do not review this.
 
 ### 9. Engineering runs
 The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are busy, units queue. For each unit:
@@ -184,8 +184,8 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 |---|---|
 | **YOU** | Human in the loop. Write PRDs (with `apf-create-prd`), make every approval decision at gates 1-3. |
 | **EM** (engineering-manager) | The main session. Watches `prds/` (kqueue on macOS, poll fallback elsewhere, via Monitor), starts the flow, hands control to AExpert, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. |
-| **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `action-plan`. A role the main session plays after the EM hands over. |
-| **ACore** (architect-core) | `deep-code` to understand the codebase against the PRD, then `group-design` to formulate candidate designs. |
+| **AExpert** (architect-chief) | Manager of the architecture team and the final word. The only agent that talks to you about architecture. Runs adversarial review, writes the spec, runs `apf-plan`. A role the main session plays after the EM hands over. |
+| **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the PRD, then `apf-group-design` to formulate candidate designs. |
 | **ACloud** (architect-cloud) | ACore's output + `deep-research`: side effects on cloud deployment. |
 | **ASolution** (architect-solution) | ACore's output + `deep-research`: the PRD in enterprise deployments with existing services. |
 | **SS** (support-sop) | Builds the SOP from the approved spec. |
@@ -193,7 +193,7 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | **Integrator** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
 | **Verifier** | Checks finished work against the PRD, spec requirement IDs and SOP. Produces a gap report. |
 | **Researcher lane** (researcher + research-judge + research-doc-writer + research-engineer) | M lanes, set at invocation (`researchers=M`). A lane takes one research request in its entirety. |
-| **researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `deep-code`): repo, web, papers, standards, prior art. Writes findings. |
+| **researcher** | Researches the request thoroughly, adversarially and objectively with parallel angle agents (modelled on `apf-deep-code`): repo, web, papers, standards, prior art. Writes findings. |
 | **research-judge** | Checks the findings against the exit criteria (gaps go back to the researcher, cap 2), decides the artifact type (`document` or `project`) and routes to one producer. |
 | **research-doc-writer** | Writes the spike document to `spikes/docs/`. |
 | **research-engineer** | Builds and runs the spike project in `spikes/projects/`. |
@@ -211,15 +211,15 @@ The EM tells you the artifact path when the lane is free again. There is no huma
 | Company context | `company-context.md` | `apf-product-foundations` | apf-create-prd, AExpert, ACloud, ASolution, SS | `apf-product-foundations/templates/company-context.md` |
 | Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `apf-product-foundations` | every agent in the project | none |
 | Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | apf-create-prd, AExpert, architects | none |
-| Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `action-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
+| Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, integrator, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
 | Option table (gate 1) | shown to you | AExpert | YOU | `templates/option-table.md` |
 | Spec draft | `drafts/SPEC-NNN.md` | AExpert | YOU, SS | `templates/spec.md` |
-| Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SS, `action-plan`, lanes, integrator, Verifier | `templates/spec.md` |
+| Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SS, `apf-plan`, lanes, integrator, Verifier | `templates/spec.md` |
 | SOP draft | `drafts/SOP-NNN.md` | SS | YOU, AExpert | `templates/sop.md` |
-| SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `action-plan`, lanes, integrator, Verifier | `templates/sop.md` |
-| Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `action-plan` | EM, lanes, integrator | `vendor/action-plan` |
+| SOP (approved) | `sops/SOP-NNN.md` | AExpert (on approval) | `apf-plan`, lanes, integrator, Verifier | `templates/sop.md` |
+| Plan | `plans/SPEC-NNN.md` (+ `.candidate-*.md`) | AExpert via `apf-plan` | EM, lanes, integrator | `vendor/apf-plan` |
 | Research request draft | `drafts/RR-NNN.md` | `apf-research` | YOU | `research/templates/research-request.md` |
 | Research request | `research/RR-NNN-<slug>.md` | `apf-research` (on your go-ahead) | watcher → EM, researcher, research-judge | `research/templates/research-request.md` |
 | Findings and judgement | `.agentic-team/research/RR-NNN/findings.md`, `judgement.md` | researcher, research-judge | research-judge, doc writer, engineer | none |
@@ -271,8 +271,8 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 ### Requirement Gap (lighter variant of the architecture flow)
 1. The Verifier writes a gap report: each unmet or partial requirement ID or SOP item, with evidence.
 2. The EM hands it to AExpert and counts the cycle.
-3. AExpert runs a scoped flow: ACore (`deep-code` on the gap only); ACloud/ASolution only if the gap touches their area; adversarial review narrowed to the gap; gate 1 skipped (the chosen option stands). A needed spec or SOP change goes to you for re-approval (gates 2/3); otherwise no human gate.
-4. AExpert runs a scoped `action-plan` for only the units that close the gap.
+3. AExpert runs a scoped flow: ACore (`apf-deep-code` on the gap only); ACloud/ASolution only if the gap touches their area; adversarial review narrowed to the gap; gate 1 skipped (the chosen option stands). A needed spec or SOP change goes to you for re-approval (gates 2/3); otherwise no human gate.
+4. AExpert runs a scoped `apf-plan` for only the units that close the gap.
 5. The EM dispatches to idle lanes, merges, and the Verifier checks again.
 6. Cap: 2 gap cycles, then escalate to you.
 
@@ -322,11 +322,11 @@ flowchart TD
     EM -->|"PRD path"| AE[AExpert]
     AE -->|"PRD + context"| AC[ACore]
     CTX -->|"code, history"| AC
-    AC -->|"understanding (deep-code)"| ACL[ACloud]
-    AC -->|"understanding (deep-code)"| AS[ASolution]
+    AC -->|"understanding (apf-deep-code)"| ACL[ACloud]
+    AC -->|"understanding (apf-deep-code)"| AS[ASolution]
     CTX -->|"web, papers (deep-research)"| ACL
     CTX -->|"web, papers (deep-research)"| AS
-    AC -->|"understanding + candidate options (group-design)"| AE
+    AC -->|"understanding + candidate options (apf-group-design)"| AE
     ACL -->|"cloud impact per option"| AE
     AS -->|"enterprise fit per option"| AE
     AE -->|"candidate outputs"| ADV[Adversarial agents]
@@ -342,7 +342,7 @@ flowchart TD
     G3 -->|"approved SOP"| SOPS
     SPECS -->|"spec (requirements, design)"| AE
     SOPS -->|"SOP (operational hooks)"| AE
-    AE -->|"action-plan: plans/SPEC-NNN.md, waves + deps"| PLANS
+    AE -->|"apf-plan: plans/SPEC-NNN.md, waves + deps"| PLANS
     PLANS -->|"plan"| EM
     EM -->|"unit + spec + SOP + plan"| LANES["Lanes: developer-i + test-i,<br/>one worktree per unit"]
     LANES -->|"lane report + branch"| INT[Integrator]
@@ -463,7 +463,7 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 
 ## Skills and packaging
 
-- **Vendored (copied into `vendor/`, adapted where noted):** `deep-code`, `group-design`, `action-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
+- **Vendored (copied into `vendor/`, adapted where noted):** `apf-deep-code`, `apf-group-design`, `apf-plan` (AExpert builds the skeleton from the approved spec and SOP, not the chat; writes to `plans/`; the "parallel agents?" question is skipped; follows `conventions.md`).
 - **Ours:** `apf-product-foundations`, `apf-start`, `apf-create-prd` and `apf-research`.
 - **Referenced, not copied:** `deep-research` from Anthropic's `anthropic-skills`. Installers need that plugin.
 
@@ -484,7 +484,7 @@ skills/
     templates/                             spec, sop, conventions, option-table, gap-report,
                                            handoff-package, pr-description, spike-document,
                                            spike-project-readme
-    vendor/                                deep-code, group-design, action-plan (read by path)
+    vendor/                                apf-deep-code, apf-group-design, apf-plan (read by path)
     scripts/watch-dir.py                   kqueue watcher, takes an event tag: PRD, RESEARCH
                                            (poll fallback elsewhere)
   apf-create-prd/                              installed as its own skill

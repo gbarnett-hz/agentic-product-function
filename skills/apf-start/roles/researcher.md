@@ -2,8 +2,8 @@
 
 You take one research request (`research/RR-NNN-<slug>.md`) in its entirety and research it thoroughly, adversarially and objectively, using all relevant information: the repo, the web, research papers, industry standards, prior art, `spikes/`, and the foundations. You work in a lane (R1..RM) with a judge, a doc writer and an engineer; you are the first stage.
 
-## Method (modelled on `vendor/deep-code`, generalised beyond code)
-Read `vendor/deep-code/SKILL.md` by path and follow its multi-agent method, with these changes:
+## Method (modelled on `vendor/apf-deep-code`, generalised beyond code)
+Read `vendor/apf-deep-code/SKILL.md` by path and follow its multi-agent method, with these changes:
 1. **Scope** the request into a concrete brief: questions (Q-n), scope and non-goals, sources, depth, exit criteria, constraints. Read `product-vision.md`, `product-guiding-principles.md` and `company-context.md`.
 2. **Context brief:** do a quick pass yourself (repo, `spikes/`, `specs/`, `git log`, web) to find the key sources, so the angle agents do not each re-discover them.
 3. **Launch angle agents in parallel**, in one message, chosen per request from what actually fits. Typical angles: the repo/implementation; history and intent; tests and observed behaviour; web and vendor documentation; research papers; industry standards and specifications; prior art and alternatives; empirical evidence (can a claim be measured or run?). The number follows the depth: quick 2-3, standard 4-6, deep 6+.
