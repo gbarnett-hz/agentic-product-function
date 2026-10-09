@@ -4,9 +4,60 @@
 
 A skill that models a product function as a team of agents. You write a PRD. An architect team assesses it, you approve an option, a spec and an SOP at three gates, and a fixed pool of developer+tester lanes builds it in git worktrees, verifies it against the PRD, spec and SOP, and opens a GitHub PR with `gh`. A second team of researchers takes research requests from `research/` and closes each with a spike (a document or a small project) in `spikes/`.
 
-See `agentic-team.png` for the original diagram (out of date: lanes are dev+test pairs, and the integrator and verifier are missing).
+Organisation (grouping only, no flows; the flows are below):
 
-**Status:** built, not yet run end to end. The tutorial below describes the intended behaviour, not recorded output. See [Known gaps](#known-gaps).
+```text
+╔═ knowledge repo [artifacts] ═════════════════════════════════════════════╗
+║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
+║ │  product-vision.md  │ │guiding-principles.md│ │  company-context.md │  ║
+║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
+║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
+║ │    conventions.md   │ │        prds/        │ │      research/      │  ║
+║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
+║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
+║ │        specs/       │ │        sops/        │ │        plans/       │  ║
+║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
+║ ┌─────────────────────┐                                                  ║
+║ │       spikes/       │                                                  ║
+║ └─────────────────────┘                                                  ║
+╚══════════════════════════════════════════════════════════════════════════╝
+╔═ architecture ═══════════════════════════════════════════════════════════╗
+║                     ┌──────────────────────────────┐                     ║
+║                     │  architect-chief [AExpert]   │                     ║
+║                     └──────────────────────────────┘                     ║
+║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
+║ │    architect-core   │ │   architect-cloud   │ │  architect-solution │  ║
+║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
+║                         ┌─────────────────────┐                          ║
+║                         │   support-sop [SS]  │                          ║
+║                         └─────────────────────┘                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+╔═ engineering (lane = developer + tester) ════════════════════════════════╗
+║                     ┌──────────────────────────────┐                     ║
+║                     │   engineering-manager [EM]   │                     ║
+║                     └──────────────────────────────┘                     ║
+║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
+║ │     developer-1     │ │     developer-2     │ │     developer-N     │  ║
+║ │       tester-1      │ │       tester-2      │ │       tester-N      │  ║
+║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
+║ ┌─────────────────────┐ ┌─────────────────────┐                          ║
+║ │      integrator     │ │       verifier      │                          ║
+║ └─────────────────────┘ └─────────────────────┘                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+╔═ research ═══════════════════════════════════════════════════════════════╗
+║ ┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐  ║
+║ │     researcher-1    │ │     researcher-M    │ │    research-judge   │  ║
+║ └─────────────────────┘ └─────────────────────┘ └─────────────────────┘  ║
+║ ┌─────────────────────┐ ┌─────────────────────┐                          ║
+║ │ research-doc-writer │ │  research-engineer  │                          ║
+║ └─────────────────────┘ └─────────────────────┘                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+                                                                   ╔═══════╗
+                                                                   ║  YOU  ║
+                                                                   ╚═══════╝
+```
+
+**Status:** tested by the author and working. See [Known gaps](#known-gaps) for what has not been exercised.
 
 ## Contents
 
@@ -38,30 +89,22 @@ You should see four skills: `apf-product-foundations`, `apf-start`, `apf-create-
 ### 2. Install into your project
 ```bash
 cd your-project
-npx skills add gbarnett-hz/agentic-product-function \
-  --skill apf-product-foundations --skill apf-start --skill apf-create-prd --skill apf-research -a claude-code
+npx skills add https://github.com/gbarnett-hz/agentic-product-function
 ```
-- Installs to `./.claude/skills/` (project scope). Commit that folder if you want your team to share it.
-- Add `-g` to install to `~/.claude/skills/` instead, for every project on your machine.
-- Add `--copy` for independent copies instead of the default symlinks to a canonical copy.
-- Add `-y` to skip prompts. Do not use `--all`: it installs to every detected agent without prompting.
-- Without flags the CLI is interactive: it lists the skills and detected agents and asks you to choose.
-- The full URL also works: `npx skills add https://github.com/gbarnett-hz/agentic-product-function`.
+The CLI is interactive: pick the skills and agents. Installs to `./.claude/skills/` for Claude Code.
 
 ### 3. Start a new Claude Code session
 Skills load at session start. Then follow the [tutorial](#tutorial): `/apf-product-foundations` once, then `/apf-start lanes=3 researchers=2`, then `/apf-create-prd` or `/apf-research`.
 
-### Update and remove
+### Update
 ```bash
-npx skills update                      # update installed skills (add -g for global only)
-npx skills remove apf-product-foundations apf-start apf-create-prd apf-research
+npx skills update
 ```
 
 ### Notes
 - `apf-deep-code`, `apf-group-design` and `apf-plan` are bundled inside `apf-start/vendor/` and read by path. They are not installed as separate skills, so they do not collide with skills of the same name you already have.
-- Local checkout instead of GitHub: `npx skills add /path/to/this/repo --skill apf-product-foundations --skill apf-start --skill apf-create-prd --skill apf-research -a claude-code`.
 - Skills run with full agent permissions. Review them before use.
-- Verified: `--list` and a non-interactive install of all four `apf-` skills from `gbarnett-hz/agentic-product-function` on GitHub put them in `./.claude/skills/` as copies, with their supporting folders (also verified from a local checkout). The installed skills have not been run (see [Known gaps](#known-gaps)).
+- Verified: `--list` and a non-interactive install of all four `apf-` skills from `gbarnett-hz/agentic-product-function` on GitHub put them in `./.claude/skills/` as copies, with their supporting folders (also verified from a local checkout).
 
 ---
 
@@ -470,7 +513,7 @@ Caveats: IEEE 29148 is paywalled, so its structure comes from secondary sources.
 Repo layout. The CLI finds a skill at each `skills/<name>/SKILL.md`. A `SKILL.md` shadows anything nested below it, which is why the vendored skills sit under `vendor/` (bundled, not listed separately) and `apf-create-prd` is a sibling.
 
 ```
-README.md  logo.jpg  agentic-team.png      repo docs (not part of any skill)
+README.md  logo.jpg                       repo docs (not part of any skill)
 skills/
   apf-start/                installed as one skill; the whole folder is copied
     SKILL.md                               entry point: /apf-start lanes=N researchers=M
@@ -504,15 +547,10 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 
 ## Known gaps
 
-- Not run end to end. Tested so far: the watcher reports a new PRD and ignores existing ones.
-- Whether subagents can message each other (developer ↔ tester, integrator → lane) as `flows/engineering.md` assumes.
 - The watcher's non-macOS path is a 2-second poll, not inotify.
 - `deep-research` must be installed separately.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
-- Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). The interactive prompts, `-g`, symlink mode, `update` and `remove` are untested, and the installed skills have not been run.
+- Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
-- `apf-product-foundations` is untested, as are its `AGENTS.md` managed block and the `CLAUDE.md` `@AGENTS.md` import (that Claude Code resolves it, and that subagents see it, is assumed, not verified). Roles also read the foundation files by explicit path, so they do not depend on it.
-- The research function is untested. It assumes a researcher (a subagent) can spawn its own angle agents; if it cannot, `roles/researcher.md` falls back to doing the angles sequentially itself, which is weaker. Researcher-lane agents are assumed able to message each other (researcher → judge → producer).
 - Naming: you wrote both `spike` and `spikes`; this uses `spikes/` (with `docs/` and `projects/`). Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate. Say if you want either changed.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.
-- `agentic-team.png` is out of date.
