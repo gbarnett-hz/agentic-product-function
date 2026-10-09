@@ -186,6 +186,7 @@ AExpert runs `apf-plan` on the approved spec and SOP: test-first steps grouped i
 The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are busy, units queue. For each unit:
 - A worktree is created; the developer works in it following `conventions.md`, runs the format, lint and type checks until clean, and sends the result to its paired tester, who re-runs the checks and reviews idiom.
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
+- Tests are isolated per worktree: each worktree gets its own key, port block and temp dir from the EM, and tests use them for every port, file, database and container, so one worktree's tests cannot affect another's (see [Test isolation](#test-isolation)). A unit that needs a resource that cannot be namespaced is marked `Exclusive:` and runs alone.
 - A wave must be merged before the next wave starts. If a plan is split across lanes, the **WaveMerger** merges the lane worktrees into `prd/PRD-001` and runs the full suite and the reproducer. A plan taken by one lane needs no merge.
 
 Progress is announced as it happens (see [Follow progress](#follow-progress)); raw state is in `.agentic-team/state.json`.
@@ -224,6 +225,14 @@ A PRD can take a long time and several can be in flight. The EM announces **ever
 2. **A dashboard**, `.agentic-team/status.md`, rewritten at every transition. In another terminal: `watch cat .agentic-team/status.md`. It shows, at the top, **what needs you** (gates, gap answers, blocked lanes, escalations); then every PRD with its phase pipeline, plan progress (`steps done/total`, wave n of W), lanes on it and PR link; all engineering lanes; researcher lanes and requests; and the last 20 events.
 
 "Step N of P" counts plan steps whose unit the tester has signed off (P is the number of Todo items in `plans/SPEC-NNN.md`). The dashboard is rendered by `scripts/render-status.py` from `.agentic-team/state.json`.
+
+### Test isolation
+Lanes, the WaveMerger and the Verifier run tests at the same time, across worktrees and across PRDs, so test strategy has to fit worktree isolation:
+- **ACore** records how your project does (or does not) isolate ports, temp files and databases/containers in `conventions.md` under "Test isolation", with violations listed as gaps.
+- **The EM** gives every worktree an isolation key (`APF_KEY`), a 100-port block (`APF_PORT_BASE`) and `TMPDIR=<worktree>/.apf-tmp`, and tells the agent to export them for every test command.
+- **Developers** write tests that use them (port 0 or the block, `$TMPDIR`, names containing `APF_KEY`, teardown after) and fix violating tests they touch. **Testers** review against the rules; the **WaveMerger** and **Verifier** run in their own keyed worktrees.
+- A resource that cannot be namespaced (shared staging, a licensed or single-instance service) is listed as **exclusive**; plan units that need it are marked `Exclusive: <resource>` and the EM never runs two at once, across all PRDs.
+- When a worktree is removed the EM runs the project's teardown for its key and frees its port block.
 
 ### Troubleshooting
 | Symptom | Cause / fix |
@@ -274,7 +283,7 @@ A PRD can take a long time and several can be in flight. The EM announces **ever
 | Agent references | `AGENTS.md` managed block (+ `CLAUDE.md` importing `@AGENTS.md`) | `apf-product-foundations` | every agent in the project | none |
 | Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | apf-create-prd, AExpert, architects | none |
 | PRD gap report | `drafts/PRD-NNN.gaps.md` | PRDGap | YOU, `apf-create-prd`, EM | `templates/prd-gap-report.md` |
-| Conventions | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, WaveMerger, Verifier | `templates/conventions.md` |
+| Conventions (incl. test isolation) | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, WaveMerger, Verifier | `templates/conventions.md` |
 | Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
 | Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
 | Option table (gate 1) | shown to you | AExpert | YOU | `templates/option-table.md` |
@@ -525,6 +534,7 @@ flowchart TD
 | ResearchJudge ↔ researcher loop | 2 rounds, then proceed with the gaps marked in the spike |
 | Research human gate | none; assumptions and gaps are recorded in the spike |
 | Parallelism | by default, if the plan permits |
+| Test isolation | tests in one worktree never affect another: per-worktree key, port block and temp dir; resources named by key; teardown after; exclusive resources run one at a time across all PRDs |
 | Idiom and conventions | `conventions.md` authority order: project's enforced config, then surrounding code, then the technology's community idiom (cited) |
 | Convention checks | developer runs format/lint/types before handoff; tester re-runs and reviews idiom; WaveMerger re-runs after each merge; Verifier reports violations as gaps |
 | Done means | the work addresses the PRD, the spec, the SOP and the conventions |
@@ -600,4 +610,5 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
 - Naming: you wrote both `spike` and `spikes`; this uses `spikes/` (with `docs/` and `projects/`). Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate. Say if you want either changed.
+- Test isolation is enforced by review (tester and Verifier read the tests and run them with the keyed environment), not by a sandbox. A test that ignores the key can still collide. Real shared environments (staging, cloud accounts) are only protected if they are listed as exclusive.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.

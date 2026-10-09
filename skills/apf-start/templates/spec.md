@@ -53,7 +53,7 @@ Rolling upgrade, wire/serialization compatibility, migration, deprecation.
 |---|---|---|---|---|
 
 ## 10. Test strategy and acceptance criteria
-Reproducer (end-to-end) plus unit and integration coverage, each traceable to requirement IDs.
+Reproducer (end-to-end) plus unit and integration coverage, each traceable to requirement IDs. Tests must be isolable per worktree (`conventions.md`, "Test isolation"): state any exclusive resource a test needs.
 
 ## 11. Operational hooks
 Signals the SOP attaches to: metrics, logs, alerts, health checks, feature flags, rollback switches.

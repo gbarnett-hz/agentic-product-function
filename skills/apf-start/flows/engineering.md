@@ -7,7 +7,7 @@ Every transition below is announced by the EM (chat line, `state.json`, `.agenti
 ## Dispatch
 1. The EM receives `plans/SPEC-NNN.md` (steps, waves, ordering constraints, N).
 2. For each wave, the EM assigns units to **idle** lanes only. No idle lane means the units queue, even if the plan is ready.
-3. The EM creates one worktree per unit (outside `prds/`, e.g. `../<repo>.worktrees/`), branching from the PRD integration branch `prd/PRD-NNN`.
+3. The EM creates one worktree per unit, each with its own isolation key, port block and `$TMPDIR` (`roles/engineering-manager.md`, "Test isolation"), so tests in one worktree never affect another; a unit marked `Exclusive:` waits for its resource. Worktrees live outside `prds/` (e.g. `../<repo>.worktrees/`) and branch from the PRD integration branch `prd/PRD-NNN`.
 4. The EM spawns the lane's developer and tester as subagents and gives each the spec, the SOP, the whole plan and its unit.
 
 ## Lane loop

@@ -9,7 +9,8 @@ You are the main session. You never plan, design or write code yourself. You wat
 {"updated": "<UTC timestamp>", "events": [{"ts": "<UTC>", "prd": "PRD-001|null", "text": "<what happened>"}],
  "researchers": {"R1": {"state": "idle|working|blocked|failed", "request": "RR-001|null", "stage": "researching|judging|writing|building"}},
  "requests": {"RR-001": {"path": "research/RR-001-slug.md", "phase": "queued|researching|judging|producing|done", "artifact": "spikes/docs/RR-001-slug.md|spikes/projects/RR-001-slug/|null", "lane": "R1"}},
- "lanes": {"L1": {"state": "idle|working|blocked|failed", "prd": "PRD-001|null", "unit": "<plan step numbers, e.g. 8-9>", "round": 1, "note": "<why blocked>", "worktree": "<path>", "branch": "<name>"}},
+ "lanes": {"L1": {"state": "idle|working|blocked|failed", "prd": "PRD-001|null", "unit": "<plan step numbers, e.g. 8-9>", "round": 1, "note": "<why blocked>", "worktree": "<path>", "branch": "<name>", "key": "<APF_KEY>", "ports": "<APF_PORT_BASE>"}},
+ "exclusive": {"<resource>": "L2|null"},
  "prds": {"PRD-001": {"path": "prds/PRD-001.md", "phase": "queued|prd-gap|architecture|spec-review|sop-review|planned|engineering|verifying|gap|pr-open",
                       "spec": "specs/SPEC-001.md", "sop": "sops/SOP-001.md", "plan": "plans/SPEC-001.md",
                       "branch": "prd/PRD-001", "wave": 1, "gap_cycles": 0, "own_write": false,
@@ -36,6 +37,12 @@ Whenever you write the PRD yourself (applying gap decisions), set `own_write: tr
 
 If `researchers` ≥ 1, start a second watcher the same way: `python3 <skill dir>/scripts/watch-dir.py research .agentic-team/seen-research.txt RESEARCH`. On `NEW_RESEARCH`: tell the user in one line, add the request to state as `queued`, and run `flows/research.md`. Re-arm it when it expires.
 
+## Test isolation
+Worktrees run tests concurrently, so the EM keeps them independent (rules in the "Test isolation" section of `conventions.md`).
+- When you create a worktree (a lane's unit, a WaveMerger integration worktree, a Verifier run), choose `APF_KEY` = the worktree directory name, give it a free 100-port block (`APF_PORT_BASE`: 20000, 20100, ...) not used by any live worktree, add `.apf-tmp/` to the repository's `.git/info/exclude`, and record `key` and `ports` in state. Put `APF_KEY`, `APF_PORT_BASE` and `TMPDIR=<worktree>/.apf-tmp` in the prompt of every agent that works there, and tell it to export them for every test command.
+- A unit marked `Exclusive: <resource>` is dispatched only when `exclusive[<resource>]` is free, across all PRDs; set it to the lane while the unit runs (including WaveMerger and Verifier runs that need it) and clear it when done. Otherwise the unit queues.
+- When you remove a worktree, first run the teardown command from `conventions.md` for its key, then free its port block.
+
 ## Dispatch (see `flows/engineering.md`)
 - Capacity is the number of lanes (fixed at invocation). Dispatch units only to **idle** lanes. If none are idle, queue the units. A new plan from architecture never overrides a full capacity.
 - Respect plan waves and ordering constraints. A wave starts when the previous wave is merged.
@@ -54,6 +61,7 @@ When all units of a PRD are merged and the Verifier reports full conformance, pu
 After gate 3 nothing asks the human unless a cap escalates (dev-test, WaveMerger conflicts, Requirement Gap cycles). An ambiguity the PRD, spec and SOP do not answer is decided by the agent that meets it, recorded as an assumption in its report and surfaced in the PR description, not asked of the human.
 
 ## Never
+- Give two live worktrees the same key or port block, or run two units that need the same exclusive resource at once.
 - Talk to the user about architecture content (AExpert does that).
 - Dispatch beyond capacity.
 - Re-trigger a PRD or research request already in state (a `MOD_PRD` is a revision of the same PRD, handled by the PRD gap flow).
