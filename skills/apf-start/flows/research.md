@@ -15,7 +15,7 @@ research/RR-NNN-slug.md ─(NEW_RESEARCH)─► EM ─► idle researcher lane R
 ## Dispatch
 1. The watcher prints `NEW_RESEARCH <path>`. The EM tells the user in one line and adds the request to `.agentic-team/state.json` as `queued`.
 2. The EM assigns it to an **idle** researcher lane. If none is idle, it queues, even when other work is waiting. Researcher capacity is separate from the engineering lanes.
-3. The EM spawns the lane's four agents (as subagents) and gives each its role file and the request path. Intermediate artifacts live in `.agentic-team/research/RR-NNN/`.
+3. The EM spawns **new** agents for the lane (researcher, ResearchJudge and the producer; never agents from a previous request) and gives each its role file and the request path. They share the request only through `.agentic-team/research/RR-NNN/`. Intermediate artifacts live in `.agentic-team/research/RR-NNN/`.
 
 ## Stages
 1. **researcher:** researches the request using `roles/researcher.md` (multi-agent, adversarial), and writes `findings.md`.

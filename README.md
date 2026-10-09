@@ -187,6 +187,7 @@ The EM dispatches the plan's units to **idle lanes only**. If all 3 lanes are bu
 - A worktree is created; the developer works in it following `conventions.md`, runs the format, lint and type checks until clean, and sends the result to its paired tester, who re-runs the checks and reviews idiom.
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
 - Tests are isolated per worktree: each worktree gets its own key, port block and temp dir from the EM, and tests use them for every port, file, database and container, so one worktree's tests cannot affect another's (see [Test isolation](#test-isolation)). A unit that needs a resource that cannot be namespaced is marked `Exclusive:` and runs alone.
+- Every unit gets a **new** developer and tester; when it completes they are finished and the lane takes its next unit with fresh agents, so one unit's context never leaks into the next. They work from file paths, write their report to `.agentic-team/reports/`, and reply in a few lines.
 - A wave must be merged before the next wave starts. If a plan is split across lanes, the **WaveMerger** merges the lane worktrees into `prd/PRD-001` and runs the full suite and the reproducer. A plan taken by one lane needs no merge.
 
 Progress is announced as it happens (see [Follow progress](#follow-progress)); raw state is in `.agentic-team/state.json`.
@@ -283,8 +284,8 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Other knowledge-repo context | `market-analysis` + codebase, github, web, papers | YOU / existing | apf-create-prd, AExpert, architects | none |
 | PRD gap report | `drafts/PRD-NNN.gaps.md` | PRDGap | YOU, `apf-create-prd`, EM | `templates/prd-gap-report.md` |
 | Conventions (incl. test isolation) | `conventions.md` (project root; shown to you at gate 1 when new or changed) | ACore | AExpert, `apf-plan`, developers, testers, WaveMerger, Verifier | `templates/conventions.md` |
-| Candidate options | AExpert's working output | ACore | ACloud, ASolution, AExpert | none |
-| Cloud impact / enterprise fit | AExpert's working output | ACloud / ASolution | AExpert | none |
+| Candidate options | `.agentic-team/arch/PRD-NNN/acore.md` | ACore | ACloud, ASolution, AExpert | none |
+| Cloud impact / enterprise fit | `.agentic-team/arch/PRD-NNN/acloud.md`, `asolution.md` | ACloud / ASolution | AExpert | none |
 | Option table (gate 1) | shown to you | AExpert | YOU | `templates/option-table.md` |
 | Spec draft | `drafts/SPEC-NNN.md` | AExpert | YOU, SOP | `templates/spec.md` |
 | Spec (approved) | `specs/SPEC-NNN.md` | AExpert (on approval) | SOP, `apf-plan`, lanes, WaveMerger, Verifier | `templates/spec.md` |
@@ -301,7 +302,9 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Unit worktree + lane report | `../<repo>.worktrees/…` | developer / tester | WaveMerger, Verifier | none |
 | Handoff package | in the WaveMerger's prompt | EM | WaveMerger | `templates/handoff-package.md` |
 | Integration branch | `prd/PRD-NNN` | WaveMerger | Verifier, EM | git |
-| Gap report | EM's message to AExpert | Verifier | EM, AExpert | `templates/gap-report.md` |
+| Gap report | `.agentic-team/reports/PRD-NNN/gap-cycle-<n>.md` | Verifier | EM, AExpert | `templates/gap-report.md` |
+| Lane report | `.agentic-team/reports/PRD-NNN/unit-<steps>.md` | developer | tester, WaveMerger | none |
+| Architect outputs | `.agentic-team/arch/PRD-NNN/acore.md`, `acloud.md`, `asolution.md` | ACore, ACloud, ASolution | AExpert, later scoped re-runs | none |
 | Pull request | GitHub | EM (`gh pr create`) | YOU | `templates/pr-description.md` |
 
 `specs/` and `sops/` hold approved artifacts only. Drafts live in `drafts/`.
@@ -343,7 +346,7 @@ A spec change caused by SOP feedback needs re-approval of the delta only. The ga
 ### Engineering (owner: EM)
 
 1. The EM dispatches the plan's units to **idle** lanes only, wave by wave. No idle lane means units queue, even when a plan is ready.
-2. Each unit gets a worktree. The lane's developer and tester receive the spec, the SOP, the whole plan (global context) and their unit (local context).
+2. Each unit gets a worktree. The lane's developer and tester get paths to the spec, SOP and plan plus a unit brief (the plan steps, the requirement IDs `R-n`, SOP scenarios `S-n` and spec sections they cite). They read only what is relevant to their unit: its steps in full, the plan outline, the cited spec rows and sections, the cited SOP scenarios, the guiding principles and conventions; anything else on demand.
 3. developer → tester → comments → developer, **cap 3 rounds**, then escalate to the EM, then you. The tester declares the unit complete and tells the EM which plan steps are done and "I am done, I am now free"; the EM reports `step N/P`.
 4. A crashed or stalled lane: the EM reassigns its unit to another idle lane.
 5. Plan split across lanes: after each wave the **WaveMerger** merges into `prd/PRD-NNN` (next wave branches from it). Plan taken by a single lane: no merge.
@@ -532,6 +535,7 @@ flowchart TD
 | Researcher capacity | `researchers=M` lanes, separate from engineering lanes; one request per lane, never split; no idle lane means it queues |
 | ResearchJudge ↔ researcher loop | 2 rounds, then proceed with the gaps marked in the spike |
 | Research human gate | none; assumptions and gaps are recorded in the spike |
+| Context hygiene | one agent per task, never reused (a lane is a capacity slot, not an agent); unique agent names per task; paths not pasted contents; developers and testers read only their unit's slice of the spec, SOP and plan; agents write detail to files and reply in at most 15 lines; the EM reads summaries, not reports |
 | Parallelism | by default, if the plan permits |
 | Test isolation | tests in one worktree never affect another: per-worktree key, port block and temp dir; resources named by key; teardown after; exclusive resources run one at a time across all PRDs |
 | Idiom and conventions | `conventions.md` authority order: project's enforced config, then surrounding code, then the technology's community idiom (cited) |
@@ -608,5 +612,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - Install is verified from GitHub and from a local path with the current names (all four skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.
 - Naming: you wrote both `spike` and `spikes`; this uses `spikes/` (with `docs/` and `projects/`). Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate. Say if you want either changed.
+- The main session is the EM and also plays AExpert, so its context grows across PRDs. The rules keep it small (summaries only, detail in files, `state.json` as memory) but it is not cleared; it relies on Claude Code's automatic compaction and recovers from `state.json` and the files.
+- Developers and testers read only their unit's slice, which depends on the plan's `Cites:` lines being complete. A step that omits a requirement or SOP scenario it depends on makes the agent read it on demand, or miss it; the Verifier still checks the whole output against every requirement and scenario.
 - Test isolation is enforced by review (tester and Verifier read the tests and run them with the keyed environment), not by a sandbox. A test that ignores the key can still collide. Real shared environments (staging, cloud accounts) are only protected if they are listed as exclusive.
 - Greenfield projects: ACore reads the codebase and derives `conventions.md` and designs from it, so an empty repo gives weak output. Seed some code first.

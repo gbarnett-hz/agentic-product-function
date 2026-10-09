@@ -46,7 +46,7 @@ Worktrees run tests concurrently, so the EM keeps them independent (rules in the
 ## Dispatch (see `flows/engineering.md`)
 - Capacity is the number of lanes (fixed at invocation). Dispatch units only to **idle** lanes. If none are idle, queue the units. A new plan from architecture never overrides a full capacity.
 - Respect plan waves and ordering constraints. A wave starts when the previous wave is merged.
-- When a lane reports "done, free", mark it idle and dispatch the next queued unit.
+- When a lane reports "done, free", mark it idle and dispatch the next queued unit with a **new** developer and tester. Agents are never reused across tasks (`SKILL.md`, "Context hygiene").
 - If a lane crashes or stalls, reassign its unit to another idle lane.
 
 ## Research dispatch (see `flows/research.md`)
@@ -61,6 +61,7 @@ When all units of a PRD are merged and the Verifier reports full conformance, pu
 After gate 3 nothing asks the human unless a cap escalates (dev-test, WaveMerger conflicts, Requirement Gap cycles). An ambiguity the PRD, spec and SOP do not answer is decided by the agent that meets it, recorded as an assumption in its report and surfaced in the PR description, not asked of the human.
 
 ## Never
+- Continue a finished agent for a new task, paste documents or diffs into a prompt, or read lane reports and findings you do not need to act on.
 - Give two live worktrees the same key or port block, or run two units that need the same exclusive resource at once.
 - Talk to the user about architecture content (AExpert does that).
 - Dispatch beyond capacity.

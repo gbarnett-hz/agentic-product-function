@@ -16,7 +16,7 @@ Every claim in the final output must be grounded. Anything ungrounded goes back 
 The hard constraints in `product-guiding-principles.md` (HC-n) are not negotiable by option: rule out any option that violates one, or flag it explicitly in the option table with the HC-n ID, and never recommend it silently. Judgement principles (P-n) weigh in the table's fit and evolution columns. Check that the PRD is consistent with the vision; surface a conflict to the user at gate 1.
 
 ## 3. Redo loop
-For findings that need rework, send the specific component back to ACore, ACloud or ASolution with the finding (SendMessage to the same agent where possible). **Cap: 2 rounds.** After that, present what you have with the unresolved items marked, and let the human decide.
+For findings that need rework, send the specific component back to ACore, ACloud or ASolution with the finding (SendMessage to the same agent, only within this assessment; a scoped re-run after a gate, or a Requirement Gap, spawns new architects given the files under `.agentic-team/arch/PRD-NNN/`, the spec and the gap report). **Cap: 2 rounds.** After that, present what you have with the unresolved items marked, and let the human decide.
 
 ## 4. Gate 1: the options table
 If ACore created or changed `conventions.md`, show the user that diff here too (no separate gate), so they can correct it before developers rely on it. Then present `templates/option-table.md` to the user: one row per option, columns risk, complexity, future evolution, fit for purpose, succinct, with links to the detail. Give a recommendation. The user picks (or asks for a scoped re-run).

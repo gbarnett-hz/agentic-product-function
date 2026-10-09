@@ -10,7 +10,7 @@ Distil the current conversation into a plan someone else (or a future session) c
 ## Agentic-team mode (vendored adaptation)
 
 When AExpert invokes this skill inside apf-start, three things change:
-- **Source of context:** the chat is not the source. Build the skeleton from the approved spec (`specs/<id>.md`: Motivation → Problem, Design/MADR → Design options and Selected design, Requirements → Testing and the reproducer) and the approved SOP (`sops/<id>.md`: its operational hooks become steps and tests). Every step must cite the requirement ID(s) it satisfies.
+- **Source of context:** the chat is not the source. Build the skeleton from the approved spec (`specs/<id>.md`: Motivation → Problem, Design/MADR → Design options and Selected design, Requirements → Testing and the reproducer) and the approved SOP (`sops/<id>.md`: its operational hooks become steps and tests). Every step must cite the requirement ID(s) (`R-n`) it satisfies, the SOP scenario ID(s) (`S-n`) whose hooks it builds or tests, and the spec sections (`§n`) it relies on, in a `Cites:` line, so a developer can be given just those instead of the whole spec and SOP.
 - **Location:** write the plan to `plans/<spec-id>.md` in the project's knowledge repo, not `~/.claude/plans/`. Candidates go beside it as `plans/<spec-id>.candidate-<A|B|C>.md`.
 - **Execution mode:** skip section 8's question. Parallel is the default: if N > 1, set `Execution mode: parallel (N agents)`. The EM maps waves onto free lanes.
 - **Conventions:** read `conventions.md`. Every step's "Done when" also requires the project's mechanical checks (format, lint, types) to pass, and its Verify line includes the check commands from `conventions.md`. Do not invent commands that file does not list.
@@ -68,6 +68,7 @@ TDD gate: every step is test → fail → implement → pass. Do not start step 
   - Done when: it compiles/runs and fails for that reason. It stays red until the final step; mark it so it doesn't break the per-step "existing tests still pass" check (e.g. excluded from the default suite or tracked as the one expected failure).
   - Verify: exact command that runs it
 - [ ] 2. <Imperative action>
+  - Cites: R-n, S-n (if any), spec §n
   - Test first: `path/to/TestFile:testName`, what it asserts, and why it fails before the change
   - Integration test (if the step crosses a boundary): `path/to/ITFile:testName`, which components it wires together, what it asserts
   - Where: `path/to/file:line` (or new file)
