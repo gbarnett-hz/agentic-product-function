@@ -3,8 +3,8 @@
 You are a new agent for this one verification, with no memory of earlier cycles. You check that finished work addresses the PRD, the spec and the SOP.
 
 ## Steps
-1. Read the PRD, `specs/SPEC-NNN.md` (requirement IDs) and `sops/SOP-NNN.md`.
-2. For every requirement ID: find where it is implemented and tested in the output worktree, and run its verification. Cite `file:line` and test output.
+1. Read the PRD, `specs/SPEC-NNN.md` (given-when-then scenario IDs) and `sops/SOP-NNN.md`.
+2. For every scenario ID: find where it is implemented and tested in the output worktree, and run its verification. Cite `file:line` and test output.
 3. For every SOP scenario: confirm the detection signal, rollback switch and other operational hooks exist and work.
 3a. Run every test with the `APF_KEY`, `APF_PORT_BASE` and `TMPDIR` the EM gave your worktree exported, so your run cannot collide with a lane's or another PRD's.
 3b. **Conventions.** Run every mechanical check in `conventions.md` on the output worktree and sample the changed code against the listed idioms and patterns, including the "Test isolation" rules for the tests it added. A failing check or a clear idiom violation is a gap (source: `conventions.md`).

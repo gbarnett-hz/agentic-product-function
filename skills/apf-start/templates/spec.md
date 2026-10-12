@@ -1,6 +1,6 @@
 # SPEC-<NNN>: <Title>
 
-Format: IEEE 29148-style requirements (what), RFC/design-doc design (how), MADR 4.0 decision record (why). The words MUST, SHOULD and MAY follow RFC 2119.
+Format: given-when-then behavioural requirements (what, derived from the PRD) approved before any code analysis; then RFC/design-doc design (how) and a MADR 4.0 decision record (why), completed after the option is chosen. The words MUST, SHOULD and MAY follow RFC 2119.
 
 | | |
 |---|---|
@@ -21,11 +21,11 @@ Why. Distilled from the PRD problem statement, with the evidence that grounds it
 - **Non-goals:**
 
 ## 4. Requirements (what)
-Verifiable, uniquely identified, design-independent. Each links to the PRD requirement it implements.
+Every PRD requirement becomes one or more behavioural scenarios in Given/When/Then form. Design-independent: no implementation, technology or file paths. Each scenario is uniquely identified, links to the PRD requirement it implements, and is the acceptance criterion the Verifier checks later.
 
-| ID | Requirement | Implements | Verification (test / inspection / analysis) |
-|---|---|---|---|
-| R-1 | The system MUST ... | PR-1 | |
+| ID | Given | When | Then | Implements |
+|---|---|---|---|---|
+| R-1 | a client sends requests to the public API | the client exceeds the allowed rate | the API MUST reject the request with HTTP 429 and a Retry-After header | PR-1 |
 
 ### 4.1 Interfaces
 External interfaces (APIs, config, wire formats, CLI).
@@ -35,6 +35,8 @@ Performance, availability, security, compatibility, operability, each with a mea
 
 ### 4.3 Constraints
 Imposed design and environment constraints. The implementation MUST conform to `conventions.md` (project config, surrounding code, and technology idiom) and to the hard constraints in `product-guiding-principles.md` (cite the HC-n IDs that apply).
+
+> Sections 5-12 are written **after** the analysis and your option choice (gate 2), with no further approval. A change to an approved scenario in section 4 does need re-approval of the delta.
 
 ## 5. Design (how)
 Architecture and key mechanisms, with `path/to/file:line` references to the existing code. Include data flow and failure behaviour.
@@ -53,7 +55,7 @@ Rolling upgrade, wire/serialization compatibility, migration, deprecation.
 |---|---|---|---|---|
 
 ## 10. Test strategy and acceptance criteria
-Reproducer (end-to-end) plus unit and integration coverage, each traceable to requirement IDs. Tests must be isolable per worktree (`conventions.md`, "Test isolation"): state any exclusive resource a test needs.
+Reproducer (end-to-end) plus unit and integration coverage, each traceable to the scenario IDs. Tests must be isolable per worktree (`conventions.md`, "Test isolation"): state any exclusive resource a test needs.
 
 ## 11. Operational hooks
 Signals the SOP attaches to: metrics, logs, alerts, health checks, feature flags, rollback switches.
@@ -63,7 +65,7 @@ Signals the SOP attaches to: metrics, logs, alerts, health checks, feature flags
 ### Context and problem statement
 ### Decision drivers
 ### Considered options
-(from the gate-1 option table, with pros and cons)
+(from the gate-2 option table, with pros and cons)
 ### Decision outcome
 Chosen option, and why. Consequences (good, bad).
 ### Confirmation

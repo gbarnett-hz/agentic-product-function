@@ -1,6 +1,6 @@
 # Flow: PRD gap analysis
 
-Owner: whoever holds the PRD (the `apf-create-prd` skill while drafting, the EM once the PRD is in `prds/`). Purpose: close the human-answerable questions **before** architecture, so everything after gates 2 and 3 can run without asking the human.
+Owner: whoever holds the PRD (the `apf-create-prd` skill while drafting, the EM once the PRD is in `prds/`). Purpose: close the human-answerable questions **before** architecture, so nothing after the spec gate has to stop and ask the human about the PRD.
 
 It runs after **every** modification of the PRD, with no exceptions: a gap answer is itself a modification, so the loop repeats until a round finds nothing.
 

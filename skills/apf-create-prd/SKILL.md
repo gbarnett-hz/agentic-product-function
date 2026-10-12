@@ -34,7 +34,7 @@ Rules while interviewing:
 Write the draft to `drafts/PRD-NNN.md` (not `prds/`). Show it to the user and edit it in place for requested changes. Status stays `Draft`.
 
 ## 3b. Gap analysis (after every change to the draft)
-Run the PRD gap flow from the sibling `apf-start` skill (`../apf-start/flows/prd-gap.md`, role `../apf-start/roles/prd-gap.md`, report template `../apf-start/templates/prd-gap-report.md`; if `apf-start` is not installed, tell the user to install it and stop). The goal is that the team needs no questions after the architecture and SOP sign-off.
+Run the PRD gap flow from the sibling `apf-start` skill (`../apf-start/flows/prd-gap.md`, role `../apf-start/roles/prd-gap.md`, report template `../apf-start/templates/prd-gap-report.md`; if `apf-start` is not installed, tell the user to install it and stop). The goal is that the team needs no questions after the spec and SOP sign-off.
 1. Spawn a subagent with description `[PRDGap] PRD-NNN analysis` and the role file; it writes `drafts/PRD-NNN.gaps.md`.
 2. For each open gap, ask the user with `AskUserQuestion`: the proposed answer (with its evidence) as the recommended option, plus "edit" and "waive". `needs-human` gaps get an open question or a waiver.
 3. Apply the decisions: accepted or edited answers go into the sections they affect (keep PR-n IDs stable; a new requirement takes the next free number); a waiver goes under section 8 as `Waived G-n: <gap>. Default assumed: <default or "architects decide">`.

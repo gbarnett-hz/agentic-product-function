@@ -10,7 +10,7 @@ import json, os, sys
 state_path = sys.argv[1] if len(sys.argv) > 1 else ".agentic-team/state.json"
 out_path = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(state_path) or ".", "status.md")
 S = json.load(open(state_path))
-PHASES = ["queued", "prd-gap", "architecture", "spec-review", "sop-review", "planned", "engineering", "verifying", "gap", "pr-open"]
+PHASES = ["queued", "prd-gap", "spec-review", "architecture", "sop-review", "planned", "engineering", "verifying", "gap", "pr-open"]
 
 def g(d, k, default="-"):
     v = d.get(k)

@@ -1,4 +1,4 @@
-# Gate 1: options for PRD-<NNN>
+# Gate 2: options for PRD-<NNN>
 
 Succinct. One row per option. Details live in the referenced documents.
 

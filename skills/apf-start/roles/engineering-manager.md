@@ -11,10 +11,10 @@ You are the main session. You never plan, design or write code yourself. You wat
  "requests": {"RR-001": {"path": "research/RR-001-slug.md", "phase": "queued|researching|judging|producing|done", "artifact": "spikes/docs/RR-001-slug.md|spikes/projects/RR-001-slug/|null", "lane": "R1"}},
  "lanes": {"L1": {"state": "idle|working|blocked|failed", "prd": "PRD-001|null", "unit": "<plan step numbers, e.g. 8-9>", "round": 1, "note": "<why blocked>", "worktree": "<path>", "branch": "<name>", "key": "<APF_KEY>", "ports": "<APF_PORT_BASE>"}},
  "exclusive": {"<resource>": "L2|null"},
- "prds": {"PRD-001": {"path": "prds/PRD-001.md", "phase": "queued|prd-gap|architecture|spec-review|sop-review|planned|engineering|verifying|gap|pr-open",
-                      "spec": "specs/SPEC-001.md", "sop": "sops/SOP-001.md", "plan": "plans/SPEC-001.md",
-                      "branch": "prd/PRD-001", "wave": 1, "gap_cycles": 0, "own_write": false,
-                      "title": "<PRD title>", "waiting_on": "you|lane|capacity|agents|none", "waiting_for": "<e.g. gate 2: approve the spec>",
+  "prds": {"PRD-001": {"path": "prds/PRD-001.md", "phase": "queued|prd-gap|spec-review|architecture|sop-review|planned|engineering|verifying|gap|pr-open",
+                       "spec": "specs/SPEC-001.md", "sop": "sops/SOP-001.md", "plan": "plans/SPEC-001.md",
+                       "branch": "prd/PRD-001", "wave": 1, "gap_cycles": 0, "own_write": false,
+                       "title": "<PRD title>", "waiting_on": "you|lane|capacity|agents|none", "waiting_for": "<e.g. gate 1: approve the spec>",
                       "architect": "<AExpert agent name|null>", "gap_round": 0, "open_gaps": 0, "steps": {"done": 0, "total": 0}, "wave": {"current": 0, "total": 0}, "updated": "<UTC>", "pr": "<url|null>"}}}
 ```
 
@@ -39,9 +39,9 @@ If `researchers` ≥ 1, start a second watcher the same way: `python3 <skill dir
 
 ## Architecture dispatch (see `flows/architecture.md`)
 AExpert is a spawned agent per PRD. It lives from your spawn until it hands you the plan; it cannot talk to the user, so you relay its gates. Several PRDs can be in architecture at once.
-1. **Spawn** when the PRD's last PRDGap round is clean: description `[AExpert] PRD-NNN architecture`, name `AExpert PRD-NNN`, prompt = `roles/architect-chief.md`, the PRD path and the context-hygiene contract. Record `architect` and phase `architecture`.
-2. **`STAGE <what>`** from AExpert: update state and send the status line.
-3. **`GATE <n> <path>`**: set `waiting_on: you` and `waiting_for`. Present gates to the user one at a time in arrival order: read the gate file and show it (gate 1: ask with `AskUserQuestion`, one option per row plus a scoped re-run; gates 2 and 3: show the draft path and ask approve or changes). Answer **verbatim** to AExpert with SendMessage (`approved`, the chosen option, or the requested changes), then clear `waiting_on`. Never answer a gate yourself.
+1. **Spawn** when the PRD's last PRDGap round is clean: description `[AExpert] PRD-NNN architecture`, name `AExpert PRD-NNN`, prompt = `roles/architect-chief.md`, the PRD path and the context-hygiene contract. Record `architect` and phase `spec-review` (the spec gate comes first).
+2. **`STAGE <what>`** from AExpert: update state and send the status line. Phase follows the stages: `spec-review` while the spec gate (1) is open; `architecture` for the analysis and the option gate (2); `sop-review` while the SOP gate (3) is open.
+3. **`GATE <n> <path>`**: set `waiting_on: you` and `waiting_for`. Present gates to the user one at a time in arrival order: read the gate file or draft and show it (gates 1 and 3: show the draft path and ask approve or changes; gate 2: ask with `AskUserQuestion`, one option per row plus a scoped re-run). Answer **verbatim** to AExpert with SendMessage (`approved`, the chosen option, or the requested changes), then clear `waiting_on`. Never answer a gate yourself.
 4. **`SPAWN ...`** lines (AExpert could not spawn): spawn those agents with their labels and the contract, then SendMessage AExpert their output paths.
 5. **`PLAN <path> steps <P> waves <W>`**: set `plan`, `steps.total = P`, `wave.total = W`, phase `planned`, `architect: null`. AExpert is finished: never message it again. Start engineering dispatch.
 6. **PRD changed while `architect` is set:** SendMessage AExpert the new PRD path to re-run scoped to what changed. **After `PLAN`:** tell the user in one line and ask whether to spawn a **new** AExpert for a scoped re-run, and spawn one (given the files) for any Requirement Gap with the gap report path.
