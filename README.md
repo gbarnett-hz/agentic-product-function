@@ -4,7 +4,7 @@
 
 NOTE. Requires a MAX plan, otherwise it's an exercise in hitting session/weekly limits.
 
-A set of skills that models a product function as a team of agents, run as explicit commands. You write a PRD (`/apf-create-prd`). You ask the architect team to turn it into a spec you approve and then to plan it (`/apf-arch PRD-001`), through three gates: you approve the spec first, then an option after the code assessment, then the SOP; the architects then write the plan. You hand the plan to a development team of the size you choose (`/apf-dev PRD-001 lanes=3`): developer+tester lanes build it in git worktrees, verify it against the PRD, spec and SOP, and open a GitHub PR with `gh`. A second team of researchers closes research requests you write (`/apf-research`, then `/apf-spike researchers=2`) with a spike (a document or a small project) in `spikes/`. Nothing watches a directory and nothing runs on its own: every phase starts when you invoke its command, and each command is one session that does its phase and stops.
+A set of skills that models a product function as a team of agents, run as explicit commands. You write a PRD (`/apf-create-prd`). You ask the architect team to turn it into a spec you approve and then to plan it (`/apf-arch PRD-001`), through three gates: you approve the spec first, then an option after the code assessment, then the SOP; the architects then write the plan. You hand the plan to the development team (`/apf-dev PRD-001`): a TeamSizer agent reads the plan, picks the optimal team size and reports its number and reasoning, and that many developer+tester lanes build it in git worktrees, verify it against the PRD, spec and SOP, and open a GitHub PR with `gh`. A second team of researchers closes research requests you write (`/apf-research`, then `/apf-spike researchers=2`) with a spike (a document or a small project) in `spikes/`. Nothing watches a directory and nothing runs on its own: every phase starts when you invoke its command, and each command is one session that does its phase and stops.
 
 Organisation (grouping only, no flows; the flows are below):
 
@@ -185,9 +185,9 @@ AExpert runs `apf-plan` on the approved spec and SOP: test-first steps grouped i
 
 ### 8. Engineering: hand the plan to the development team
 ```
-/apf-dev PRD-001 lanes=3
+/apf-dev PRD-001
 ```
-You choose the team size: 3 lanes means 3 developers, each paired with a tester; lanes are `L1`..`L3` for the session, and units queue if all lanes are busy. The EM dispatches the plan's units to **idle lanes only**, wave by wave. For each unit:
+The team size is not your decision to make: a **TeamSizer** agent reads the plan's waves, per-step size and `Exclusive:` resources and recommends the size — no more lanes than the effective widest wave, fewer when steps serialize or are too small to be worth a lane. Its number and reasoning are printed in the chat before any work starts, and the full analysis is written to `.agentic-team/reports/PRD-001/team-size.md`. That many lanes are fixed for the session (say 4: 4 developers, each paired with a tester; lanes `L1`..`L4`), and units queue if all lanes are busy. The EM dispatches the plan's units to **idle lanes only**, wave by wave. For each unit:
 - A worktree is created; the developer works in it following `conventions.md`, runs the format, lint and type checks until clean, and sends the result to its paired tester, who re-runs the checks and reviews idiom.
 - They loop on comments (max 3 rounds). The tester declares the unit complete and reports "I am done, I am free". The EM sends that lane the next queued unit.
 - Tests are isolated per worktree: each worktree gets its own key, port block and temp dir from the EM, and tests use them for every port, file, database and container, so one worktree's tests cannot affect another's (see [Test isolation](#test-isolation)). A unit that needs a resource that cannot be namespaced is marked `Exclusive:` and runs alone.
@@ -267,7 +267,8 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | **ACloud** (architect-cloud) | ACore's output + `apf-deep-research`: side effects on cloud deployment. |
 | **ASolution** (architect-solution) | ACore's output + `apf-deep-research`: the PRD in enterprise deployments with existing services. |
 | **SOP** (support-sop) | Builds the SOP from the approved spec. |
-| **Lane** (Developer-i + Tester-i) | A developer paired with a tester. N lanes, chosen when `/apf-dev` is invoked. Each unit of work is isolated in a git worktree. |
+| **TeamSizer** (team-sizer) | Runs whenever `/apf-dev` is invoked: reads the plan's waves, step sizes and exclusive resources and picks the optimal lane count for it — at most the effective widest wave, fewer when steps serialize or are too small to be worth a lane. Writes `.agentic-team/reports/PRD-NNN/team-size.md`; its number and reasoning are printed in the chat. |
+| **Lane** (Developer-i + Tester-i) | A developer paired with a tester. N lanes, N chosen by the TeamSizer when `/apf-dev` is invoked. Each unit of work is isolated in a git worktree. |
 | **WaveMerger** | Merges lane worktrees into one output worktree when a plan is split across lanes. |
 | **Verifier** | Checks finished work against the PRD, spec requirement IDs and SOP. Produces a gap report. |
 | **Researcher lane** (Researcher + ResearchJudge + ResearchDocWriter + ResearchEngineer) | M lanes, chosen when `/apf-spike` is invoked (`researchers=M`). Each lane has its own Researcher, ResearchJudge, ResearchDocWriter and ResearchEngineer (1:1, like Developer:Tester), so there is no shared producer pool. A lane takes one research request in its entirety. |
@@ -311,6 +312,7 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Integration branch | `prd/PRD-NNN` | WaveMerger | Verifier, EM | git |
 | Gap report | `.agentic-team/reports/PRD-NNN/gap-cycle-<n>.md` | Verifier | EM, AExpert | `templates/gap-report.md` |
 | Lane report | `.agentic-team/reports/PRD-NNN/unit-<steps>.md` | developer | tester, WaveMerger | none |
+| Team-size report | `.agentic-team/reports/PRD-NNN/team-size.md` | TeamSizer | EM, YOU | none |
 | Architect outputs | `.agentic-team/arch/PRD-NNN/acore.md`, `acloud.md`, `asolution.md` | ACore, ACloud, ASolution | AExpert, later scoped re-runs | none |
 | Pull request | GitHub | the `/apf-dev` EM (`gh pr create`) | YOU | `templates/pr-description.md` |
 
@@ -351,7 +353,7 @@ Precondition: the PRD gap analysis is clean for the current version (`apf-create
 
 The spec is approved before any code analysis: its scenarios are design-independent. Sections 5-12 are completed after the option choice with no further approval; a change to an approved scenario (sections 1-4) needs re-approval of the delta. A spec change caused by SOP feedback needs re-approval of the delta only. The gate to the EM is spec approved AND SOP approved. **Lifetime:** the architecture function for a PRD runs from the `/apf-arch` spawn until AExpert replies `PLAN`. AExpert writes each gate to a file and ends its turn; the EM shows it to you and resumes AExpert with your answer. Later work (a Requirement Gap in `/apf-dev`, or a re-run after a PRD change) gets a **new** AExpert given the files.
 
-### Engineering (owner: the EM of `/apf-dev`, capacity `lanes=N`)
+### Engineering (owner: the EM of `/apf-dev`, capacity = the TeamSizer's answer)
 
 1. The command selects the PRD and its plan, then dispatches the plan's units to **idle** lanes only, wave by wave. No idle lane means units queue, even when a plan is ready.
 2. Each unit gets a worktree. The lane's developer and tester get paths to the spec, SOP and plan plus a unit brief (the plan steps, the requirement IDs `R-n`, SOP scenarios `S-n` and spec sections they cite). They read only what is relevant to their unit: its steps in full, the plan outline, the cited spec rows and sections, the cited SOP scenarios, the guiding principles and conventions; anything else on demand.
@@ -449,8 +451,10 @@ flowchart TD
     SPECS -->|"spec (scenarios, design)"| AE
     SOPS -->|"SOP (operational hooks)"| AE
     AE -->|"apf-plan: plans/SPEC-NNN.md, waves + deps; AExpert then shut down"| PLANS
-    YOU -->|"/apf-dev PRD-NNN lanes=N"| EMD["EM: /apf-dev"]
+    YOU -->|"/apf-dev PRD-NNN"| EMD["EM: /apf-dev"]
     PLANS -->|"plan"| EMD
+    EMD -->|"plan"| TS[TeamSizer]
+    TS -->|"LANES n + reason, printed to YOU"| EMD
     EMD -->|"unit + spec + SOP + plan"| LANES["Lanes: Developer-i + Tester-i,<br/>one worktree per unit"]
     LANES -->|"lane report + branch"| INT[WaveMerger]
     LANES -.->|"I am done, I am free"| EMD
@@ -533,7 +537,7 @@ flowchart TD
 
 | Rule | Value |
 |---|---|
-| Commands | user-triggered only: `/apf-create-prd`, `/apf-arch PRD-NNN`, `/apf-dev [PRD-NNN] lanes=N`, `/apf-research`, `/apf-spike [RR-NNN] researchers=M`. No watchers; nothing runs on its own. One command at a time (`state.json` has a single writer) |
+| Commands | user-triggered only: `/apf-create-prd`, `/apf-arch PRD-NNN`, `/apf-dev [PRD-NNN]`, `/apf-research`, `/apf-spike [RR-NNN] researchers=M`. No watchers; nothing runs on its own. One command at a time (`state.json` has a single writer) |
 | Who talks to you about architecture | AExpert, through the `/apf-arch` EM: it writes each gate to a file and the EM relays it and your answer |
 | Architecture lifetime | AExpert and its architects are spawned per PRD by `/apf-arch` when the PRD is gap-clean and shut down when the plan is handed to the EM, which ends the command; later work gets new agents |
 | Status updates | on every state transition: one chat line, `state.json` updated, `.agentic-team/status.md` re-rendered; the dashboard's "Needs you" lists everything waiting on you |
@@ -548,7 +552,7 @@ flowchart TD
 | Adversarial angles | chosen per PRD |
 | Gate to the EM | spec approved AND SOP approved |
 | Plan review | none, it goes straight to the EM of `/apf-dev` |
-| Capacity | `/apf-dev lanes=N`; lanes only, no idle lane means no dispatch |
+| Capacity | a TeamSizer agent picks N from the plan on every `/apf-dev`; its number and reasoning are printed before dispatch; lanes only, no idle lane means no dispatch |
 | Researcher capacity | `/apf-spike researchers=M` lanes, separate from engineering lanes; one request per lane, never split; no idle lane means it queues |
 | ResearchJudge ↔ researcher loop | 2 rounds, then proceed with the gaps marked in the spike |
 | Research human gate | none; assumptions and gaps are recorded in the spike |
@@ -593,9 +597,9 @@ skills/
     SKILL.md                               entry point: /apf-arch PRD-NNN
     roles/                                 engineering-manager (the phase EM), architect-chief,
                                            architect-core, architect-cloud, architect-solution,
-                                           prd-gap, support-sop, developer, tester, wave-merger,
-                                           verifier, researcher, research-judge, research-doc-writer,
-                                           research-engineer
+                                           prd-gap, support-sop, team-sizer, developer, tester,
+                                           wave-merger, verifier, researcher, research-judge,
+                                           research-doc-writer, research-engineer
     flows/                                 prd-gap.md, architecture.md, engineering.md,
                                            requirement-gap.md, research.md
     templates/                             spec, sop, conventions, option-table, gap-report,
@@ -605,7 +609,7 @@ skills/
                                            apf-plan (read by path)
     scripts/render-status.py               state.json -> .agentic-team/status.md dashboard
   apf-dev/                  installed as its own skill; reads ../apf-arch
-    SKILL.md                               entry point: /apf-dev [PRD-NNN] lanes=N
+    SKILL.md                               entry point: /apf-dev [PRD-NNN]
   apf-spike/                installed as its own skill; reads ../apf-arch
     SKILL.md                               entry point: /apf-spike [RR-NNN] researchers=M
   apf-create-prd/                          installed as its own skill; runs PRDGap from apf-arch
@@ -628,6 +632,7 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/`) and `.agent
 - There is no watcher anywhere: a published PRD or research request does nothing until you run `/apf-arch` or `/apf-spike`. An edit to a published PRD is caught by the hash check the next time `/apf-arch` runs; between the edit and that run nothing re-analyses it, and an edit made while `/apf-dev` is building the plan is not noticed at all.
 - One command at a time: `.agentic-team/state.json` has a single writer, so two commands running concurrently (even for different PRDs) can lose each other's state.
 - `/apf-dev` and `/apf-spike` read roles, flows and templates from the sibling `apf-arch` install; installing them without `apf-arch` does not work.
+- TeamSizer's optimum is a heuristic read of the plan's own wave analysis: optimistic or wrong wave grouping misleads it, and wall-clock vs token cost is a judgement call. There is deliberately no per-invocation override; say if you want one back.
 - Convention checks are only as strong as the project's tooling. Where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
 - Install is verified from GitHub and from a local path with the current names (skills found and installed with all supporting folders). `-g`, symlink mode, `update` and `remove` are untested.
 - Whether the skills.sh website needs anything beyond a public GitHub repo to list the skills is unknown.

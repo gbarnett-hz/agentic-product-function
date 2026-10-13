@@ -24,7 +24,7 @@ Spawn **AExpert** for the PRD (description `[AExpert] PRD-NNN architecture`, pro
 
 - At each gate, set `waiting_on: you` and present it to the user; answer AExpert **verbatim** (approve, chosen option, or requested changes). Never answer a gate yourself.
 - If the PRD already has a spec, SOP or plan (this is a re-run after an edit), tell AExpert to run **scoped to what changed**, with the existing artifacts as input, instead of starting over.
-- On `PLAN <path> steps <P> waves <W>`: record the plan, steps and waves in `state.json`, set the PRD `planned`, create the integration branch `prd/PRD-NNN` from the base (without checking it out), and stop. AExpert is finished; never message it again. Tell the user in one line that the plan is ready and to run `/apf-dev PRD-NNN lanes=N`.
+- On `PLAN <path> steps <P> waves <W>`: record the plan, steps and waves in `state.json`, set the PRD `planned`, create the integration branch `prd/PRD-NNN` from the base (without checking it out), and stop. AExpert is finished; never message it again. Tell the user in one line that the plan is ready and to run `/apf-dev PRD-NNN` (the TeamSizer will pick the team size from the plan and report it).
 
 ## Rules
 - One command, one PRD: no watcher, no queue, nothing runs on its own. To architecture another PRD, run `/apf-arch` again (a new session); run one command at a time, because `.agentic-team/state.json` has a single writer.

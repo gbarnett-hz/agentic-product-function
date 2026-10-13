@@ -1,6 +1,6 @@
 # Flow: engineering
 
-Owner: the EM of the `/apf-dev` command. Capacity = number of lanes, given as `lanes=N` when the command is invoked. A lane is a developer paired with a tester. The command builds one PRD's plan and stops when the PR is open.
+Owner: the EM of the `/apf-dev` command. Capacity = number of lanes: a **TeamSizer** agent reads the plan and chooses it at invocation, and the EM prints the number and its reasoning. A lane is a developer paired with a tester. The command builds one PRD's plan and stops when the PR is open.
 
 Every transition below is announced by the EM (chat line, `state.json`, `.agentic-team/status.md`; see "Status updates" in `roles/engineering-manager.md`). On taking over the plan the EM sets the totals: P = number of Todo steps, W = number of waves.
 

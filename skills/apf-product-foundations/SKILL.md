@@ -63,4 +63,4 @@ Claude Code reads `CLAUDE.md`, not `AGENTS.md`. Check for `CLAUDE.md`:
 - Already imports it: nothing to do.
 
 ## 5. Finish
-Tell the user which files were written, that `AGENTS.md` now references them, and the next steps: `/apf-create-prd` to write a PRD, then `/apf-arch PRD-NNN` to spec and plan it, then `/apf-dev PRD-NNN lanes=N` to build it. Suggest committing the files.
+Tell the user which files were written, that `AGENTS.md` now references them, and the next steps: `/apf-create-prd` to write a PRD, then `/apf-arch PRD-NNN` to spec and plan it, then `/apf-dev PRD-NNN` to build it (the TeamSizer picks the team size). Suggest committing the files.
