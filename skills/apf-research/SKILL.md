@@ -1,6 +1,6 @@
 ---
 name: apf-research
-description: Interview the user and write a research request in the fixed spike-request template to research/, ready for /apf-spike to hand it to a team of researchers. The result is a spike (a document or a small project) in spikes/. Use when the user says "/apf-research", "research this", "run a spike", "investigate X", "I need a spike on", or wants the agentic team's researchers to look into a question thoroughly, adversarially and objectively. Nothing runs on its own: the request waits until the user runs /apf-spike.
+description: "Interview the user and write a research request in the fixed spike-request template to research/, ready for /apf-spike to hand it to a team of researchers. The result is a spike (a document or a small project) in spikes/. Use when the user says \"/apf-research\", \"research this\", \"run a spike\", \"investigate X\", \"I need a spike on\", or wants the agentic team's researchers to look into a question thoroughly, adversarially and objectively. Nothing runs on its own: the request waits until the user runs /apf-spike."
 ---
 
 # apf-research

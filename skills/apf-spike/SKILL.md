@@ -1,6 +1,6 @@
 ---
 name: apf-spike
-description: Run research requests with a team of researcher lanes, on demand. Each request written by /apf-research is taken whole by one lane (researcher, ResearchJudge, ResearchDocWriter, ResearchEngineer) and closed with a spike: a document in spikes/docs/ or a small project in spikes/projects/. Use when the user says "apf-spike", "run the research", "run RR-001 with 2 researchers", or has research requests in research/ and wants them answered. Takes an optional request id (default: every pending request) and researchers=M. Nothing runs on its own: without this command no request is picked up.
+description: "Run research requests with a team of researcher lanes, on demand. Each request written by /apf-research is taken whole by one lane (researcher, ResearchJudge, ResearchDocWriter, ResearchEngineer) and closed with a spike: a document in spikes/docs/ or a small project in spikes/projects/. Use when the user says \"apf-spike\", \"run the research\", \"run RR-001 with 2 researchers\", or has research requests in research/ and wants them answered. Takes an optional request id (default: every pending request) and researchers=M. Nothing runs on its own: without this command no request is picked up."
 ---
 
 # apf-spike

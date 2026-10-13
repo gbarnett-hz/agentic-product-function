@@ -63,7 +63,7 @@ AExpert is a spawned agent per PRD. It lives from your spawn until it hands you 
 
 ## Command: apf-dev `[PRD-NNN]`
 
-The engineering phase: a fixed pool of developer+tester lanes builds one PRD's plan in worktrees, merges it wave by wave, verifies it, and opens the PR. The command's SKILL.md has already resolved the PRD; this section is the run itself. The team size is always chosen by the TeamSizer and fixed for the session.
+The engineering phase: a fixed pool of developer+tester lanes builds one PRD's plan in worktrees, merges it wave by wave, verifies it, and opens the PR. The command's SKILL.md has already resolved the PRD and checked its `gap_clean_hash` still matches; this section is the run itself. The team size is always chosen by the TeamSizer and fixed for the session.
 
 ### Team size
 - Spawn a new **TeamSizer** (`roles/team-sizer.md`, description `[TeamSizer] PRD-NNN team size`, the plan path and `conventions.md`, plus the context-hygiene contract). It writes `.agentic-team/reports/PRD-NNN/team-size.md` and replies `LANES <n>` followed by its reasoning.

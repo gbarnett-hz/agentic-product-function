@@ -1,6 +1,6 @@
 ---
 name: apf-arch
-description: Run the architecture phase for one PRD, on demand. Spawns an architect team (AExpert, ACore, ACloud, ASolution) that drafts a spec you approve first (gate 1), assesses the code and proposes options (gate 2), completes the spec, drafts the SOP you approve (gate 3), and then writes the plan. Use when the user says "apf-arch", "architecture for PRD-001", "turn this PRD into a spec and plan", or has a PRD in prds/ published by apf-create-prd and wants it specified and planned. Takes the PRD id (e.g. PRD-001). Nothing runs on its own: without this command no PRD is picked up. Ends with plans/SPEC-NNN.md ready; the user runs /apf-dev next.
+description: "Run the architecture phase for one PRD, on demand. Spawns an architect team (AExpert, ACore, ACloud, ASolution) that drafts a spec you approve first (gate 1), assesses the code and proposes options (gate 2), completes the spec, drafts the SOP you approve (gate 3), and then writes the plan. Use when the user says \"apf-arch\", \"architecture for PRD-001\", \"turn this PRD into a spec and plan\", or has a PRD in prds/ published by apf-create-prd and wants it specified and planned. Takes the PRD id (e.g. PRD-001). Nothing runs on its own: without this command no PRD is picked up. Ends with plans/SPEC-NNN.md ready; the user runs /apf-dev next."
 ---
 
 # apf-arch

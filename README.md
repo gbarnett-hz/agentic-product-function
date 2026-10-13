@@ -31,7 +31,7 @@ cd your-project
 npx skills add https://github.com/gbarnett-hz/agentic-product-function
 ```
 
-The CLI is interactive: pick the skills and agents. Install all six (`apf-dev` and `apf-spike` read their roles, flows and templates from their sibling `apf-arch`), then start a new Claude Code session: skills load at session start.
+The CLI is interactive: pick the skills and agents. Install all six (`apf-dev`, `apf-spike` and `apf-create-prd` read their roles, flows and templates from their sibling `apf-arch`), then start a new Claude Code session: skills load at session start.
 
 ```bash
 npx skills update   # update later
@@ -142,7 +142,7 @@ A **lane** is a capacity slot, not an agent: an engineering lane is Developer-i 
 |---|---|
 | Commands | user-triggered only; no watchers, nothing runs on its own; one command at a time (`state.json` has a single writer) |
 | Gates | 1 spec, 2 option, 3 SOP — always yours (relayed by the EM); the plan is never reviewed |
-| PRD gap analysis | after every draft change until a round reports `No open gaps.` (max 10 gaps/round); `/apf-arch` re-runs it if a published PRD was edited |
+| PRD gap analysis | after every draft change until a round reports `No open gaps.` (max 10 gaps/round); `/apf-arch` re-runs it if a published PRD was edited; `/apf-dev` refuses to start when the PRD's hash no longer matches (re-run `/apf-arch`) |
 | Architecture redo loop | 2 rounds, then escalate to you |
 | Dev ↔ test loop | 3 rounds, then EM, then you |
 | WaveMerger conflict loop | 3 rounds, then EM, then you |
@@ -192,15 +192,15 @@ The knowledge-repo directories (`prds/ specs/ sops/ plans/ drafts/ research/ spi
 
 ## Known gaps
 
-- No watcher anywhere: a published PRD or research request does nothing until you run `/apf-arch` or `/apf-spike`. An edit to a published PRD is only caught by the hash check the next time `/apf-arch` runs, and an edit made while `/apf-dev` is building the plan is not noticed at all.
+- No watcher anywhere: a published PRD or research request does nothing until you run `/apf-arch` or `/apf-spike`. An edit to a published PRD is caught by the hash check the next time `/apf-arch` runs, or at `/apf-dev` startup (it stops and sends you back to `/apf-arch`); an edit made while `/apf-dev` is running is not noticed.
 - One command at a time: `.agentic-team/state.json` has a single writer, so two concurrent commands (even for different PRDs) can lose each other's state.
-- `/apf-dev` and `/apf-spike` read roles, flows and templates from the sibling `apf-arch` install; installing them without `apf-arch` does not work.
+- `/apf-dev`, `/apf-spike` and `/apf-create-prd` read roles, flows and templates from the sibling `apf-arch` install; installing them without `apf-arch` does not work.
 - TeamSizer's optimum is a heuristic read of the plan's own wave analysis: optimistic wave grouping misleads it, and wall-clock vs token cost is a judgement call. There is deliberately no per-invocation override.
 - Convention checks are only as strong as the project's tooling; where no formatter or linter exists, `conventions.md` records it under Gaps and testers cover it by hand.
-- Install is verified from GitHub and a local path with the current names. `-g`, symlink mode, `update` and `remove` are untested; whether the skills.sh website needs anything beyond a public GitHub repo is unknown.
+- Install is verified with the current skills CLI from a local checkout and a git clone: `--list` and both install modes (symlink, `--copy`) land all six skills with their supporting folders, and `update` and `remove` work. The public GitHub URL needs a re-check after the `SKILL.md` frontmatter fix is pushed. `-g` is untested; whether the skills.sh website needs anything beyond a public GitHub repo is unknown.
 - Spikes are left uncommitted in the working tree (no PR per spike), and the research flow has no human gate: read the spike and decide.
-- Each command session is fresh, but a long `/apf-dev` run still lives in one session and relies on Claude Code's automatic compaction; `state.json` is its memory across the compaction.
-- AExpert spawning its own architects and being resumed after each gate (`SendMessage`) is assumed; the fallback (asking the EM to spawn via `SPAWN` lines) and the resume are untested.
+- Each command session is fresh, but a long `/apf-dev` run still lives in one session: Claude Code auto-compacts when context fills, or you can run `/compact` at a wave boundary. `state.json` and the reports are the memory — the EM re-anchors on them after any compaction.
+- AExpert spawning its own architects and being resumed after each gate (`SendMessage`) is exercised and works; the fallback (the EM spawning them from AExpert's `SPAWN` lines, used when AExpert cannot spawn) is untested.
 - Developers and testers read only their unit's slice, which depends on the plan's `Cites:` lines being complete; the Verifier still checks the whole output against every requirement and scenario.
 - Test isolation is enforced by review (tester and Verifier run tests with the keyed environment), not by a sandbox: a test that ignores the key can still collide, and shared environments are only protected if listed as exclusive.
 - Greenfield projects: ACore derives `conventions.md` and designs from the codebase, so an empty repo gives weak output. Seed some code first.

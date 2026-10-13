@@ -1,6 +1,6 @@
 ---
 name: apf-create-prd
-description: Interview the user and write a PRD in the fixed PRD template (`templates/prd.md` in this skill) to prds/, ready for /apf-arch PRD-NNN to take into architecture. Use when the user says "apf-create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start with a new product requirement. Nothing runs on its own: the published PRD waits until the user runs /apf-arch.
+description: "Interview the user and write a PRD in the fixed PRD template (`templates/prd.md` in this skill) to prds/, ready for /apf-arch PRD-NNN to take into architecture. Use when the user says \"apf-create-prd\", \"write a PRD\", \"new PRD\", \"I want to spec a feature for the agentic team\", or wants to start with a new product requirement. Nothing runs on its own: the published PRD waits until the user runs /apf-arch."
 ---
 
 # apf-create-prd
