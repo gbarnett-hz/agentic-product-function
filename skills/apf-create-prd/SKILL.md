@@ -44,4 +44,4 @@ Run the PRD gap flow from the sibling `apf-start` skill (`../apf-start/flows/prd
 Only when the user says it is ready **and the last gap analysis round reported `No open gaps.`** (if the draft changed since, run it again first):
 1. Set Status to `Ready`, set the date.
 2. Write it to `prds/PRD-NNN-<short-slug>.md` in a single write (the watcher waits for the file to settle, but a single write is safest). Remove the draft.
-3. Tell the user the path. The EM picks it up only if it is already running (`/apf-start lanes=N`): the watcher treats any PRD that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `prds/`.
+3. Tell the user the path. The EM picks it up only if it is already running (`/apf-start lanes=N`): the watcher treats any PRD that exists when it first starts as already seen. On `NEW_PRD` it goes straight to architecture — the clean round you just ran is the gap check the EM relies on; it only re-runs gap analysis if the published PRD is edited later. If the EM is not running, tell the user to start it and then move the file out and back into `prds/`.

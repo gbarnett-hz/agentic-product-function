@@ -156,10 +156,10 @@ The skill orients itself (next ID, the three foundation files, research files if
 
 It writes `drafts/PRD-001.md` and edits it with you. After every change to the draft, **PRDGap** reads your foundations, earlier PRDs, specs, research, the code and git, and the web, and lists what the team would otherwise have to ask you later: vague requirements, missing targets, conflicts, hidden dependencies, operational needs. Each gap comes with a proposed answer and its evidence. You accept, edit or waive each one; accepted answers go into the PRD and waivers are recorded in section 8. Every such edit triggers another round, until a round reports `No open gaps.` The aim is that, after you sign off the spec and the SOP, nobody needs to ask you anything.
 
-When you say it is ready (and the last round is clean), it writes `prds/PRD-001-api-rate-limiting.md` in one write. **That write starts the flow.** If you edit the PRD in `prds/` later, the EM sees the change and runs the gap analysis again.
+When you say it is ready (and the last round is clean), it writes `prds/PRD-001-api-rate-limiting.md` in one write. **That write starts the flow.** The EM takes the published PRD straight to architecture — its gap round is already clean — and only re-runs the gap analysis if you edit the PRD in `prds/` later.
 
 ### 4. The architecture team drafts the spec
-Once the PRD is gap-clean the EM flags it in one line and spawns an **AExpert** agent for that PRD. AExpert lives from then until it hands the finished plan to the EM, then it and its architects are shut down. It cannot talk to you directly: at each gate it writes the gate to a file, and the EM shows it to you and passes your answer back.
+The EM flags the new PRD in one line and spawns an **AExpert** agent for that PRD. AExpert lives from then until it hands the finished plan to the EM, then it and its architects are shut down. It cannot talk to you directly: at each gate it writes the gate to a file, and the EM shows it to you and passes your answer back.
 
 AExpert's first move is a draft specification, **before any code analysis**: it turns every PRD requirement into given-when-then scenarios in `drafts/SPEC-001.md`. Every scenario has an ID (`R-1`...) linked to your `PR-n`, and is design-independent — no implementation, technology or file paths. The EM shows you the draft. Approve it, or ask for changes in plain language; AExpert edits the draft in place and the EM shows it to you again. When you approve, it moves to `specs/SPEC-001.md`. The spec's design sections stay empty for now; they are filled in after you pick an option (step 6), with no second approval.
 
@@ -259,7 +259,7 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 | Agent | Role |
 |---|---|
 | **YOU** | Human in the loop. Write PRDs (with `apf-create-prd`), make every approval decision at gates 1-3. |
-| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), runs the PRD gap flow, spawns AExpert once it is clean and relays its gates to you, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. Announces every state transition (chat line plus `.agentic-team/status.md`). |
+| **EM** (engineering-manager) | The main session. Watches `prds/` for new and edited PRDs (via Monitor), spawns AExpert for a new PRD directly and runs the PRD gap flow only when a published PRD is edited, relays AExpert's gates to you, dispatches plans to lanes by capacity, tracks free lanes, pushes PRs with `gh`. Announces every state transition (chat line plus `.agentic-team/status.md`). |
 | **AExpert** (architect-chief) | Manager of the architecture team and the final word on architecture. A **spawned agent per PRD**: the EM spawns it when the PRD is gap-clean and it is shut down when it hands the plan to the EM. Drafts the spec before any code analysis, spawns the architects and the adversarial agents, completes the spec after the option, runs `apf-plan`. Does not talk to you directly: gates 1-3 go through the EM. |
 | **PRDGap** (prd-gap) | Finds what the PRD leaves unsaid (ambiguity, untestable requirements, conflicts, hidden dependencies, operational needs) from foundations, earlier PRDs, specs, research, code, git and web. Proposes a cited answer per gap. Runs after every PRD modification, so the flow after the spec and SOP gates needs no questions. |
 | **ACore** (architect-core) | `apf-deep-code` to understand the codebase against the approved spec, then `apf-group-design` to formulate candidate designs. |
@@ -319,20 +319,20 @@ Lanes, the WaveMerger and the Verifier run tests at the same time, across worktr
 
 ## Flows
 
-### PRD gap analysis (owner: `apf-create-prd`, then the EM)
+### PRD gap analysis (owner: `apf-create-prd`; the EM when a published PRD is edited)
 
 | Step | Actor | Input | Output |
 |---|---|---|---|
-| 1 | `apf-create-prd` or EM | a new or modified PRD | spawns PRDGap |
+| 1 | `apf-create-prd` (new draft) or the EM (a published PRD that was edited) | a new or modified PRD | spawns PRDGap |
 | 2 | PRDGap | PRD, foundations, knowledge repo, code, git, web | `drafts/PRD-NNN.gaps.md`: open gaps only, max 10, each with a proposed answer and evidence |
 | 3 | **YOU** | each gap | accepted, edited or waived |
 | 4 | caller | decisions | PRD updated (answers into sections, waivers into section 8); back to step 1 |
 
-Done is a round with `No open gaps.` The PRD is published, or handed to AExpert, only then. A PRD edited after architecture started is re-analysed; while AExpert is still running it is told to re-run scoped to the change, after the plan was handed over the EM asks whether to spawn a new AExpert for a scoped re-run.
+Done is a round with `No open gaps.` `apf-create-prd` publishes only then, and that clean round is the precondition for AExpert, so the EM takes a newly published PRD straight to architecture without another pass. If a published PRD is edited, the EM re-runs the flow: while AExpert is still running it is told to re-run scoped to the change; after the plan was handed over the EM asks whether to spawn a new AExpert for a scoped re-run.
 
 ### Architecture (owner: AExpert, a spawned agent per PRD)
 
-Precondition: the PRD gap analysis is clean.
+Precondition: the PRD gap analysis is clean (`apf-create-prd` publishes only a gap-clean PRD; an edit to a published PRD is re-checked by the EM).
 
 | Step | Actor | Input | Output |
 |---|---|---|---|
@@ -416,11 +416,12 @@ flowchart TD
     CP -->|"draft, after every change"| PG[PRDGap]
     PG -->|"gaps + proposed answers"| CP
     CP -->|"accept / edit / waive"| PG
-    PRDS -->|"NEW_PRD / MOD_PRD event (watcher)"| EM
-    EM -->|"PRD, after every change"| PG
+    PRDS -->|"NEW_PRD event (watcher)"| EM
+    PRDS -->|"MOD_PRD event (watcher)"| EM
+    EM -->|"edited PRD"| PG
     PG -->|"No open gaps"| EM
     CTX -->|"code, git, web, research"| PG
-    EM -->|"spawn AExpert per PRD, only when gap analysis is clean"| AE[AExpert]
+    EM -->|"spawn AExpert per PRD: gap-clean, whether new or re-checked"| AE[AExpert]
     AE -->|"SPEC draft (given-when-then,<br/>no code analysis)"| DRAFTS
     DRAFTS -->|"drafts/SPEC-NNN.md, relayed by EM"| G1{{"Gate 1: YOU approve spec"}}
     G1 -->|"approved spec"| SPECS
@@ -531,7 +532,7 @@ flowchart TD
 | Who talks to you about architecture | AExpert, through the EM: it writes each gate to a file and the EM relays it and your answer |
 | Architecture lifetime | AExpert and its architects are spawned per PRD when the PRD is gap-clean and shut down when the plan is handed to the EM; later work gets new agents |
 | Status updates | on every state transition: one chat line, `state.json` updated, `.agentic-team/status.md` re-rendered; the dashboard's "Needs you" lists everything waiting on you |
-| PRD gap analysis | after every PRD modification, until `No open gaps.`; max 10 gaps per round; no architecture before it is clean |
+| PRD gap analysis | `apf-create-prd` after every draft change, and the EM after every edit to a published PRD, until `No open gaps.`; max 10 gaps per round; a new PRD arrives gap-clean, so the EM takes it straight to architecture |
 | Free-running after gate 3 | no questions to you unless a cap escalates; unanswered ambiguity becomes a recorded assumption in the PR description |
 | Grounding | Every claim cites a `file:line` or URL; AExpert enforces |
 | Architecture redo loop | 2 rounds, then escalate to you |

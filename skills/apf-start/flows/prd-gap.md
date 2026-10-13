@@ -1,22 +1,22 @@
 # Flow: PRD gap analysis
 
-Owner: whoever holds the PRD (the `apf-create-prd` skill while drafting, the EM once the PRD is in `prds/`). Purpose: close the human-answerable questions **before** architecture, so nothing after the spec gate has to stop and ask the human about the PRD.
+Owner: the `apf-create-prd` skill while drafting; the EM only when a PRD already in `prds/` is edited. A PRD published by the skill arrives gap-clean and goes straight to architecture. Purpose: close the human-answerable questions **before** architecture, so nothing after the spec gate has to stop and ask the human about the PRD.
 
 It runs after **every** modification of the PRD, with no exceptions: a gap answer is itself a modification, so the loop repeats until a round finds nothing.
 
 | Step | Actor | Input | Output |
 |---|---|---|---|
-| 1 | caller | a new or modified PRD | spawns PRDGap |
+| 1 | caller | a new draft or modified PRD | spawns PRDGap |
 | 2 | PRDGap | PRD, foundations, knowledge repo, code and git, web | `drafts/PRD-NNN.gaps.md` (open gaps only, max 10) |
 | 3 | caller | the report | zero gaps: done. Otherwise show each gap with its proposed answer |
 | 4 | **you** | each gap | `accepted`, `edited` or `waived` (`needs-human` gaps get an answer or a waiver) |
 | 5 | caller | decisions | PRD updated (accepted/edited answers into the sections they affect; waivers under §8). This is a modification: back to step 1 |
 
-Done = a round with **No open gaps**. Only then may the PRD be published (`apf-create-prd`) or handed to the EM to spawn AExpert.
+Done = a round with **No open gaps**. Only then may the PRD be published (`apf-create-prd`); a newly published PRD goes straight to AExpert, and a later edit to a published PRD must pass a clean round before the change reaches AExpert.
 
 ## Triggers
 - `apf-create-prd`: after every draft change, including the user's own edits. The PRD is published only when the last round is clean.
-- EM, `NEW_PRD`: before architecture. The PRD may have been written without the skill.
+- EM, `NEW_PRD`: no run — `apf-create-prd` publishes only a gap-clean PRD, so the EM spawns AExpert directly.
 - EM, `MOD_PRD` (the watcher reports an edited PRD): run the flow on the new version, ignoring changes the EM made itself (`own_write` in `state.json`). Then:
   - while AExpert is still running (before it hands over the plan): send it the new PRD to re-run scoped to what changed;
   - after the plan was handed over: tell the user in one line and ask whether to spawn a new AExpert for a scoped re-run.

@@ -4,7 +4,7 @@ Owner: AExpert, a spawned agent per PRD. The human-facing flow: AExpert writes e
 
 Each step is announced by the EM as a status update (`roles/engineering-manager.md`, "Status updates"); at gates the PRD is `waiting_on: you`.
 
-Precondition (gate 0): `flows/prd-gap.md` reported `No open gaps.` for the current version of the PRD. The EM does not start this flow otherwise.
+Precondition (gate 0): the current version of the PRD is gap-clean. `apf-create-prd` publishes only after a `No open gaps.` round (`flows/prd-gap.md`), so the EM spawns AExpert directly for a new PRD; an edit to a published PRD is re-analysed first. The EM does not start this flow otherwise.
 
 | Step | Actor | Input | Output | Next |
 |---|---|---|---|---|
