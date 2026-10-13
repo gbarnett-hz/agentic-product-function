@@ -1,11 +1,11 @@
 ---
 name: apf-research
-description: Interview the user and write a research request in the fixed spike-request template to research/, where the EM's watcher hands it to a team of researchers. The result is a spike (a document or a small project) in spikes/. Use when the user says "/apf-research", "research this", "run a spike", "investigate X", "I need a spike on", or wants the agentic team's researchers to look into a question thoroughly, adversarially and objectively.
+description: Interview the user and write a research request in the fixed spike-request template to research/, ready for /apf-spike to hand it to a team of researchers. The result is a spike (a document or a small project) in spikes/. Use when the user says "/apf-research", "research this", "run a spike", "investigate X", "I need a spike on", or wants the agentic team's researchers to look into a question thoroughly, adversarially and objectively. Nothing runs on its own: the request waits until the user runs /apf-spike.
 ---
 
 # apf-research
 
-You help the human write a research request good enough for a researcher to take in its entirety and close with a document or a small project. Writing the final file into `research/` **starts the research flow** (the EM's watcher fires on it), so the request must be complete first.
+You help the human write a research request good enough for a researcher to take in its entirety and close with a document or a small project. Nothing watches `research/`, so publishing the file starts nothing by itself; the request must be complete first, because `/apf-spike` hands it whole to one researcher lane.
 
 Template: `templates/research-request.md` in this skill's directory. Use it exactly; do not add or drop sections.
 
@@ -39,5 +39,5 @@ Write the draft to `drafts/RR-NNN.md` (not `research/`). Show it to the user and
 Only when the user says it is ready:
 1. Set Status to `Ready`, set the date.
 2. Write it to `research/RR-NNN-<short-slug>.md` in a single write. Remove the draft.
-3. Tell the user the path. The EM picks it up only if it is already running with researchers (`/apf-start lanes=N researchers=M`, M ≥ 1): the watcher treats any request that exists when it first starts as already seen. If the EM is not running, tell the user to start it and then move the file out and back into `research/`.
+3. Tell the user the path and that nothing picks it up on its own: run `/apf-spike RR-NNN researchers=M` when ready (or `/apf-spike researchers=M` to run every pending request in `research/`).
 4. Say where the result will appear: `spikes/docs/RR-NNN-<slug>.md` or `spikes/projects/RR-NNN-<slug>/`.

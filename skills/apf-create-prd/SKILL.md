@@ -1,11 +1,11 @@
 ---
 name: apf-create-prd
-description: Interview the user and write a PRD in the fixed apf-start PRD template (`templates/prd.md` in this skill) to prds/, where the EM's watcher picks it up. Use when the user says "apf-create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start the apf-start flow with a new product requirement.
+description: Interview the user and write a PRD in the fixed PRD template (`templates/prd.md` in this skill) to prds/, ready for /apf-arch PRD-NNN to take into architecture. Use when the user says "apf-create-prd", "write a PRD", "new PRD", "I want to spec a feature for the agentic team", or wants to start with a new product requirement. Nothing runs on its own: the published PRD waits until the user runs /apf-arch.
 ---
 
 # apf-create-prd
 
-You help the human write a PRD good enough for the architecture team to act on. Writing the final file into `prds/` **starts the whole flow** (the EM's watcher fires on it), so the PRD must be complete first.
+You help the human write a PRD good enough for the architecture team to act on. Nothing watches `prds/`, so publishing the file starts nothing by itself; the PRD must be complete and gap-clean first, because `/apf-arch PRD-NNN` takes it straight to the architect team.
 
 Template: `templates/prd.md` in this skill's directory. Use it exactly; do not add or drop sections.
 
@@ -34,7 +34,7 @@ Rules while interviewing:
 Write the draft to `drafts/PRD-NNN.md` (not `prds/`). Show it to the user and edit it in place for requested changes. Status stays `Draft`.
 
 ## 3b. Gap analysis (after every change to the draft)
-Run the PRD gap flow from the sibling `apf-start` skill (`../apf-start/flows/prd-gap.md`, role `../apf-start/roles/prd-gap.md`, report template `../apf-start/templates/prd-gap-report.md`; if `apf-start` is not installed, tell the user to install it and stop). The goal is that the team needs no questions after the spec and SOP sign-off.
+Run the PRD gap flow from the sibling `apf-arch` skill (`../apf-arch/flows/prd-gap.md`, role `../apf-arch/roles/prd-gap.md`, report template `../apf-arch/templates/prd-gap-report.md`; if `apf-arch` is not installed, tell the user to install it and stop). The goal is that the team needs no questions after the spec and SOP sign-off.
 1. Spawn a subagent with description `[PRDGap] PRD-NNN analysis` and the role file; it writes `drafts/PRD-NNN.gaps.md`.
 2. For each open gap, ask the user with `AskUserQuestion`: the proposed answer (with its evidence) as the recommended option, plus "edit" and "waive". `needs-human` gaps get an open question or a waiver.
 3. Apply the decisions: accepted or edited answers go into the sections they affect (keep PR-n IDs stable; a new requirement takes the next free number); a waiver goes under section 8 as `Waived G-n: <gap>. Default assumed: <default or "architects decide">`.
@@ -43,5 +43,6 @@ Run the PRD gap flow from the sibling `apf-start` skill (`../apf-start/flows/prd
 ## 4. Publish
 Only when the user says it is ready **and the last gap analysis round reported `No open gaps.`** (if the draft changed since, run it again first):
 1. Set Status to `Ready`, set the date.
-2. Write it to `prds/PRD-NNN-<short-slug>.md` in a single write (the watcher waits for the file to settle, but a single write is safest). Remove the draft.
-3. Tell the user the path. The EM picks it up only if it is already running (`/apf-start lanes=N`): the watcher treats any PRD that exists when it first starts as already seen. On `NEW_PRD` it goes straight to architecture — the clean round you just ran is the gap check the EM relies on; it only re-runs gap analysis if the published PRD is edited later. If the EM is not running, tell the user to start it and then move the file out and back into `prds/`.
+2. Write it to `prds/PRD-NNN-<short-slug>.md` in a single write. Remove the draft.
+3. Record the clean version in `.agentic-team/state.json` (create `.agentic-team/` and the file if missing; keep every existing entry): under `prds["PRD-NNN"]` set `path`, `title`, `phase: "queued"`, `gap_clean_hash` = the file's SHA-1 (`shasum -a 1 <path>`), and `updated`. This records that the published version passed a clean gap round; `/apf-arch` checks it before spawning AExpert and re-runs the gap analysis if the file changes later.
+4. Tell the user the path and that nothing picks it up on its own: run `/apf-arch PRD-NNN` when ready.

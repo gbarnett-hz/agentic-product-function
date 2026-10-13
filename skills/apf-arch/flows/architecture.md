@@ -1,14 +1,14 @@
 # Flow: architecture
 
-Owner: AExpert, a spawned agent per PRD. The human-facing flow: AExpert writes each gate to a file and the EM relays it to the user and the answer back. **Lifetime:** the architecture function for a PRD exists from the EM's spawn of AExpert (PRD gap-clean) until AExpert hands the plan to the EM; then AExpert and every architecture agent are finished. Later work (Requirement Gap, PRD change after the plan) gets a new AExpert given the files.
+Owner: AExpert, a spawned agent per PRD, started by the `/apf-arch` command. The human-facing flow: AExpert writes each gate to a file and the EM (the command's main session) relays it to the user and the answer back. **Lifetime:** the architecture function for a PRD exists from the spawn of AExpert (PRD gap-clean) until AExpert hands the plan to the EM; then AExpert and every architecture agent are finished and the command stops. Later work (Requirement Gap in `/apf-dev`, or a re-run of `/apf-arch` after a PRD change) gets a new AExpert given the files.
 
 Each step is announced by the EM as a status update (`roles/engineering-manager.md`, "Status updates"); at gates the PRD is `waiting_on: you`.
 
-Precondition (gate 0): the current version of the PRD is gap-clean. `apf-create-prd` publishes only after a `No open gaps.` round (`flows/prd-gap.md`), so the EM spawns AExpert directly for a new PRD; an edit to a published PRD is re-analysed first. The EM does not start this flow otherwise.
+Precondition (gate 0): the current version of the PRD is gap-clean. `apf-create-prd` publishes only after a `No open gaps.` round and records the clean hash, so `/apf-arch` spawns AExpert directly when the hash matches; if the PRD was edited after that, the command re-runs the gap analysis (`flows/prd-gap.md`) first. Architecture never starts otherwise.
 
 | Step | Actor | Input | Output | Next |
 |---|---|---|---|---|
-| 1 | EM | `prds/PRD-NNN.md` | spawns AExpert | AExpert |
+| 1 | EM (`/apf-arch`) | gap-clean `prds/PRD-NNN.md` | spawns AExpert | AExpert |
 | 2 | AExpert | PRD, foundations, knowledge repo | `drafts/SPEC-NNN.md`: given-when-then scenarios for every PRD requirement, sections 1-4 only (no code analysis yet) | gate 1 |
 | 3 | **Gate 1** (human, via the EM) | draft spec | approval, or changes (loop to 2) | `specs/SPEC-NNN.md` |
 | 4 | ACore | approved spec, PRD, repo | understanding + candidate options (apf-deep-code → apf-group-design) | ACloud, ASolution, AExpert |
@@ -18,10 +18,12 @@ Precondition (gate 0): the current version of the PRD is gap-clean. `apf-create-
 | 8 | AExpert | chosen option | completes the spec's sections 5-12 in `specs/SPEC-NNN.md` (no re-approval) | SOP |
 | 9 | SOP | completed spec | `drafts/SOP-NNN.md` (+ gaps) | gate 3 |
 | 10 | **Gate 3** (human, via the EM) | draft SOP | approval, or scoped re-run of the architecture flow (fresh 2-round cap) | `sops/SOP-NNN.md` |
-| 11 | AExpert | spec AND SOP approved | `plans/SPEC-NNN.md` (apf-plan, parallel by default); AExpert replies `PLAN` and is shut down | EM |
+| 11 | AExpert | spec AND SOP approved | `plans/SPEC-NNN.md` (apf-plan, parallel by default); AExpert replies `PLAN` and is shut down; the EM creates `prd/PRD-NNN` and stops | `/apf-dev` |
 
 Rules:
 - The spec is approved before any code analysis: its scenarios are design-independent (no implementation, technology or file paths). Sections 5-12 (design, cloud, enterprise, decision record) are completed after the option choice with no further approval. If the analysis forces a change to an approved scenario (sections 1-4), that delta needs re-approval through gate 1.
 - Spec changes caused by SOP feedback need re-approval of the delta only.
 - Drafts live in `drafts/`; `specs/` and `sops/` hold only approved artifacts.
 - Gate to the EM = spec approved AND SOP approved.
+- If the PRD already has a spec, SOP or plan (a re-run after an edit), AExpert runs scoped to what changed, given those files, rather than starting over.
+- One command, one PRD, no watcher: `/apf-arch` runs for a single PRD and stops when the plan is handed over. Another PRD gets another invocation (not at the same time: `state.json` has a single writer).

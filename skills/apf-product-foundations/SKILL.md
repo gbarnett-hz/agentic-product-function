@@ -1,11 +1,11 @@
 ---
 name: apf-product-foundations
-description: One-time interactive setup that creates a project's product-vision.md, product-guiding-principles.md and company-context.md with the user, then references them from AGENTS.md. Run it once, before /apf-start or /apf-create-prd. Use when the user says "apf-product-foundations", "set up the product vision", "write our guiding principles", "set up company context", or is starting a new project for the agentic team and has none of these files.
+description: One-time interactive setup that creates a project's product-vision.md, product-guiding-principles.md and company-context.md with the user, then references them from AGENTS.md. Run it once, before /apf-create-prd and the /apf-arch, /apf-dev and /apf-spike commands. Use when the user says "apf-product-foundations", "set up the product vision", "write our guiding principles", "set up company context", or is starting a new project for the agentic team and has none of these files.
 ---
 
 # apf-product-foundations
 
-You help the human write the three documents every agent in the team is grounded in. Run once per project, before `/apf-start` and `/apf-create-prd`. Re-running refines existing files; it never silently overwrites them.
+You help the human write the three documents every agent in the team is grounded in. Run once per project, before `/apf-create-prd` and the `/apf-arch`, `/apf-dev` and `/apf-spike` commands. Re-running refines existing files; it never silently overwrites them.
 
 | File (project root) | What it holds | Template |
 |---|---|---|
@@ -63,4 +63,4 @@ Claude Code reads `CLAUDE.md`, not `AGENTS.md`. Check for `CLAUDE.md`:
 - Already imports it: nothing to do.
 
 ## 5. Finish
-Tell the user which files were written, that `AGENTS.md` now references them, and the next steps: `/apf-start lanes=N`, then `/apf-create-prd`. Suggest committing the files.
+Tell the user which files were written, that `AGENTS.md` now references them, and the next steps: `/apf-create-prd` to write a PRD, then `/apf-arch PRD-NNN` to spec and plan it, then `/apf-dev PRD-NNN lanes=N` to build it. Suggest committing the files.
