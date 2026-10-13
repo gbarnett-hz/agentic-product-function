@@ -45,38 +45,34 @@ Notes:
 
 ## Command flow
 
-```text
-SETUP (once)
-  /apf-product-foundations
-    └─ product-vision.md · product-guiding-principles.md · company-context.md
+```mermaid
+flowchart TD
+    YOU(["YOU — one command at a time; keeps every gate"])
 
-PRODUCT
-  /apf-create-prd
-    └─ interview → drafts/PRD-NNN.md ⇄ PRDGap after every change
-       → prds/PRD-NNN-<slug>.md  (only after a "No open gaps." round, on your go-ahead)
+    PF["/apf-product-foundations<br/>once per project"]
+    CP["/apf-create-prd"]
+    AR["/apf-arch PRD-NNN"]
+    DV["/apf-dev PRD-NNN"]
+    RS["/apf-research"]
+    SP["/apf-spike RR-NNN researchers=M"]
+    PR(["GitHub PR"])
 
-ARCHITECTURE
-  /apf-arch PRD-NNN
-    ├─ Gate 1  you approve the spec draft          → specs/SPEC-NNN.md
-    ├─ ACore · ACloud · ASolution · adversarial review
-    ├─ Gate 2  you pick an option (conventions shown if new/changed)
-    │          → spec design sections completed, no re-approval
-    ├─ Gate 3  you approve the SOP                 → sops/SOP-NNN.md
-    └─ plan written, no review                     → plans/SPEC-NNN.md
+    YOU --> PF
+    YOU --> CP
+    YOU --> AR
+    YOU --> DV
+    YOU --> RS
+    YOU --> SP
 
-ENGINEERING
-  /apf-dev PRD-NNN
-    ├─ TeamSizer reads the plan, prints lane count N + reasoning (no lanes=N option)
-    ├─ N × (Developer + Tester): one worktree per unit, a new pair per unit
-    ├─ WaveMerger merges each wave (only when a plan is split across lanes) → prd/PRD-NNN
-    ├─ Verifier checks the output against the PRD, spec and SOP
-    └─ CONFORMS → push + gh pr create → you review and merge the PR
-
-RESEARCH (any time)
-  /apf-research        → research/RR-NNN-<slug>.md
-  /apf-spike RR-NNN researchers=M
-    └─ Researcher → ResearchJudge → ResearchDocWriter | ResearchEngineer
-       → spikes/docs/RR-NNN-<slug>.md | spikes/projects/RR-NNN-<slug>/
+    PF -->|"vision · principles · context ground every agent"| CP
+    CP -->|"PRDGap: cited answers after every change, until no open gaps<br/>→ prds/PRD-NNN.md"| AR
+    AR -->|"AExpert drafts the spec → gate 1<br/>ACore, ACloud, ASolution + adversaries → gate 2<br/>SOP builds the runbook → gate 3, then apf-plan → plans/SPEC-NNN.md"| DV
+    AR -.->|"gates relayed by the EM to you"| YOU
+    DV -->|"TeamSizer sizes N lanes<br/>Developer + Tester per unit in worktrees → WaveMerger → Verifier<br/>CONFORMS → push + gh pr create"| PR
+    PR -.->|"you review and merge"| YOU
+    RS -->|"writes research/RR-NNN.md"| SP
+    SP -->|"Researcher → ResearchJudge → ResearchDocWriter or ResearchEngineer<br/>→ spikes/docs/ or spikes/projects/"| AR
+    SP -.->|"spikes inform later PRDs"| CP
 ```
 
 | Command | Phase | What it does |
